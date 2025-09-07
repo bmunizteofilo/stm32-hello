@@ -1,0 +1,42 @@
+# === STM32CubeIDE / Eclipse metadata ===
+.project
+.cproject
+.settings/
+.loadpath
+.externalToolBuilders/
+
+# === Pastas de build (geradas pela IDE ou make) ===
+build/
+Debug/
+Release/
+out/
+*.o
+*.d
+*.elf
+*.map
+*.bin
+*.hex
+*.lst
+
+# === Arquivos temporários ===
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*~
+
+# === Arquivos de sistema (Windows/Linux/macOS) ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Logs ===
+*.log
+
+# === Outros opcionais ===
+# Pastas de teste ou simulação podem gerar artefatos
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
