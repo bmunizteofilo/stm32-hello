@@ -15,6 +15,10 @@ endif()
 file(GLOB DRIVERS_SRC
   ../stm32_repo/Drivers/*.c
 )
+# Exclui arquivos com instruções específicas de ARM que falham no host
+list(FILTER DRIVERS_SRC EXCLUDE REGEX "cm0\\.c$")
+# Stubs para compilar no host (substituem implementações com assembly)
+list(APPEND DRIVERS_SRC ../stm32_repo/Drivers/cm0_stub.c)
 
 # Lib 'core' com os drivers (ou interface vazia se ainda não existirem .c)
 if(DRIVERS_SRC)
