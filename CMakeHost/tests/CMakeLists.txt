@@ -22,3 +22,7 @@ add_test(NAME i2c COMMAND test_i2c)
 add_executable(test_rtc test_rtc.c)
 target_link_libraries(test_rtc PRIVATE core)
 add_test(NAME rtc COMMAND test_rtc)
+
+add_executable(test_usart test_usart.c)
+target_link_libraries(test_usart PRIVATE core)
+add_test(NAME usart COMMAND test_usart)
