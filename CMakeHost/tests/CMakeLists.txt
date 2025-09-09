@@ -18,3 +18,7 @@ add_test(NAME dma COMMAND test_dma)
 add_executable(test_i2c test_i2c.c)
 target_link_libraries(test_i2c PRIVATE core)
 add_test(NAME i2c COMMAND test_i2c)
+
+add_executable(test_rtc test_rtc.c)
+target_link_libraries(test_rtc PRIVATE core)
+add_test(NAME rtc COMMAND test_rtc)

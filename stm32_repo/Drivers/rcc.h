@@ -53,6 +53,7 @@ enum rcc_sysclk_cfg {
 };
 
 bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg);
+bool rcc_sysclk_config_hse(uint32_t hse_hz, uint32_t sysclk_hz);
 uint32_t rcc_sysclk_hz(void);
 
 void rcc_ahb_enable(uint32_t mask);
