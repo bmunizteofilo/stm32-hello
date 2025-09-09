@@ -6,23 +6,6 @@
 #include "rcc.h"
 #include "cm0.h"
 
-#ifndef STM32F0_FIRMWARE
-/* For host builds create dummy USART_TypeDef struct */
-struct USART_TypeDef {
-    volatile uint32_t CR1;
-    volatile uint32_t CR2;
-    volatile uint32_t CR3;
-    volatile uint32_t BRR;
-    volatile uint32_t GTPR;
-    volatile uint32_t RTOR;
-    volatile uint32_t RQR;
-    volatile uint32_t ISR;
-    volatile uint32_t ICR;
-    volatile uint32_t RDR;
-    volatile uint32_t TDR;
-};
-#endif
-
 typedef struct {
     volatile uint32_t CR1;
     volatile uint32_t CR2;
