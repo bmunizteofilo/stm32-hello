@@ -3,6 +3,7 @@
  * Define -DSTM32F0_FIRMWARE for real implementation; otherwise stubs are built.
  */
 #include "gpio.h"
+#include "rcc.h"
 #include "cm0.h"
 
 #if defined(STM32F0_FIRMWARE)
@@ -20,17 +21,6 @@ struct GPIO_TypeDef {
 };
 
 typedef struct {
-    volatile uint32_t CR;
-    volatile uint32_t CFGR;
-    volatile uint32_t CIR;
-    volatile uint32_t APB2RSTR;
-    volatile uint32_t APB1RSTR;
-    volatile uint32_t AHBENR;
-    volatile uint32_t APB2ENR;
-    volatile uint32_t APB1ENR;
-} RCC_TypeDef;
-
-typedef struct {
     volatile uint32_t CFGR1;
     volatile uint32_t RCR;
     volatile uint32_t EXTICR[4];
@@ -45,7 +35,6 @@ typedef struct {
     volatile uint32_t PR;
 } EXTI_TypeDef;
 
-#define RCC    ((RCC_TypeDef *)0x40021000u)
 #define SYSCFG ((SYSCFG_TypeDef *)0x40010000u)
 #define EXTI   ((EXTI_TypeDef *)0x40010400u)
 
@@ -79,7 +68,7 @@ void gpio_config(GPIO_TypeDef *port, uint8_t pin, const gpio_cfg_t *cfg) {
     uint32_t bit = 1u << pin;
     uint32_t shift = (uint32_t)pin * 2u;
 
-    RCC->AHBENR |= gpio_rcc_mask(port);
+    rcc_ahb_enable(gpio_rcc_mask(port));
 
     port->MODER = (port->MODER & ~(3u << shift)) | ((uint32_t)cfg->mode << shift);
     port->PUPDR = (port->PUPDR & ~(3u << shift)) | ((uint32_t)cfg->pull << shift);
@@ -141,8 +130,8 @@ bool gpio_attach_irq(GPIO_TypeDef *port, uint8_t pin, enum gpio_edge_t edge,
     }
 
     /* Enable clocks for GPIO port and SYSCFG */
-    RCC->AHBENR |= gpio_rcc_mask(port);
-    RCC->APB2ENR |= (1u << 0); /* SYSCFG clock */
+    rcc_ahb_enable(gpio_rcc_mask(port));
+    rcc_apb2_enable(RCC_APB2ENR_SYSCFG);
 
     /* Configure EXTI source */
     uint32_t idx = pin / 4u;
