@@ -4,9 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#if defined(STM32F0_FIRMWARE)
 #define DMA1_BASE 0x40020000u
-#endif
 
 typedef struct {
     volatile uint32_t CCR;
@@ -22,9 +20,7 @@ typedef struct {
     DMA_Channel_TypeDef CH[7];
 } DMA_TypeDef;
 
-#if defined(STM32F0_FIRMWARE)
 #define DMA1 ((DMA_TypeDef *)DMA1_BASE)
-#endif
 
 #define DMA_CCR_EN      (1u << 0)
 #define DMA_CCR_TCIE    (1u << 1)

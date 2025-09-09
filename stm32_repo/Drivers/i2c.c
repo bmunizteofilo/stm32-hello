@@ -8,8 +8,6 @@
 
 #define I2C_IT_BUF_SIZE 64u
 
-#if defined(STM32F0_FIRMWARE)
-
 typedef struct {
     volatile uint32_t CR1;
     volatile uint32_t CR2;
@@ -286,41 +284,3 @@ void i2c_example_read_dma(void) {
     i2c_read_dma_start(I2C1, &DMA1->CH[3], 0x50u, data, 4u, it_cb, NULL);
 }
 
-#else /* STM32F0_FIRMWARE */
-
-bool i2c_init(I2C_TypeDef *i2c, const i2c_cfg_t *cfg) {
-    return i2c && cfg;
-}
-void i2c_enable(I2C_TypeDef *i2c, bool en) {(void)i2c;(void)en;}
-bool i2c_write_poll(I2C_TypeDef *i2c, uint8_t addr, const uint8_t *data, size_t len) {
-    (void)addr;
-    return i2c && data && len>0u;
-}
-bool i2c_read_poll(I2C_TypeDef *i2c, uint8_t addr, uint8_t *data, size_t len) {
-    (void)addr;
-    if (i2c && data && len>0u) { data[0]=0u; return true;} return false;
-}
-bool i2c_write_it_start(I2C_TypeDef *i2c, uint8_t addr, const uint8_t *data, size_t len, i2c_cb_t cb, void *ctx) {
-    (void)addr;
-    if (i2c && data && len>0u) { if (cb) cb(ctx); return true;} return false;
-}
-bool i2c_read_it_start(I2C_TypeDef *i2c, uint8_t addr, uint8_t *data, size_t len, i2c_cb_t cb, void *ctx) {
-    (void)addr;
-    if (i2c && data && len>0u) { if (cb) cb(ctx); data[0]=0u; return true;} return false;
-}
-bool i2c_write_dma_start(I2C_TypeDef *i2c, DMA_Channel_TypeDef *tx_ch, uint8_t addr, const uint8_t *data, size_t len, i2c_cb_t cb, void *ctx) {
-    (void)addr;
-    if (i2c && tx_ch && data && len>0u) { if (cb) cb(ctx); return true;} return false;
-}
-bool i2c_read_dma_start(I2C_TypeDef *i2c, DMA_Channel_TypeDef *rx_ch, uint8_t addr, uint8_t *data, size_t len, i2c_cb_t cb, void *ctx) {
-    (void)addr;
-    if (i2c && rx_ch && data && len>0u) { if (cb) cb(ctx); data[0]=0u; return true;} return false;
-}
-void i2c_example_write_poll(void) {}
-void i2c_example_read_poll(void) {}
-void i2c_example_write_it(void) {}
-void i2c_example_read_it(void) {}
-void i2c_example_write_dma(void) {}
-void i2c_example_read_dma(void) {}
-
-#endif /* STM32F0_FIRMWARE */
