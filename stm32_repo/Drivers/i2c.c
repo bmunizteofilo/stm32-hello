@@ -189,7 +189,7 @@ bool i2c_write_dma_start(I2C_TypeDef *i2c, DMA_Channel_TypeDef *tx_ch, uint8_t a
     I2C_TypeDef_real *s = i2c_real(i2c);
     rcc_ahb_enable(RCC_AHBENR_DMA1);
     dma_config_channel(tx_ch, DMA_CCR_MINC | DMA_CCR_DIR | DMA_CCR_TCIE);
-    dma_set_peripheral(tx_ch, &s->TXDR);
+    dma_set_peripheral(tx_ch, (const void*)&s->TXDR);
     dma_set_memory(tx_ch, (void *)data);
     dma_set_count(tx_ch, len);
     dma_set_callback(DMA1, dma_channel_index(tx_ch), i2c_dma_cb, st);
@@ -210,7 +210,7 @@ bool i2c_read_dma_start(I2C_TypeDef *i2c, DMA_Channel_TypeDef *rx_ch, uint8_t ad
     I2C_TypeDef_real *s = i2c_real(i2c);
     rcc_ahb_enable(RCC_AHBENR_DMA1);
     dma_config_channel(rx_ch, DMA_CCR_MINC | DMA_CCR_TCIE);
-    dma_set_peripheral(rx_ch, &s->RXDR);
+    dma_set_peripheral(rx_ch, (const void*)&s->RXDR);
     dma_set_memory(rx_ch, data);
     dma_set_count(rx_ch, len);
     dma_set_callback(DMA1, dma_channel_index(rx_ch), i2c_dma_cb, st);

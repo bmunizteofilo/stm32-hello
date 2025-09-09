@@ -2,6 +2,14 @@
 
 static uint32_t sysclk_hz = 8000000u;
 
+static void flash_latency_cfg(uint32_t hz) {
+    if (hz > 24000000u) {
+        FLASH->ACR = 1u; /* 1 wait state */
+    } else {
+        FLASH->ACR = 0u;
+    }
+}
+
 bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg) {
     switch (cfg) {
     case RCC_SYSCLK_HSI8:
@@ -9,7 +17,28 @@ bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg) {
         RCC->CR |= (1u << 0); /* HSION */
         while ((RCC->CR & (1u << 1)) == 0u) {}
         RCC->CFGR &= ~(3u << 0);
+        flash_latency_cfg(8000000u);
+        RCC->CFGR = (RCC->CFGR & ~3u);
         sysclk_hz = 8000000u;
+        return true;
+    case RCC_SYSCLK_HSE8:
+        RCC->CR |= (1u << 16); /* HSEON */
+        while ((RCC->CR & (1u << 17)) == 0u) {}
+        flash_latency_cfg(8000000u);
+        RCC->CFGR = (RCC->CFGR & ~3u) | 1u; /* HSE as SYSCLK */
+        sysclk_hz = 8000000u;
+        return true;
+    case RCC_SYSCLK_PLL_HSI_24MHZ:
+        RCC->CR |= (1u << 0); /* HSION */
+        while ((RCC->CR & (1u << 1)) == 0u) {}
+        RCC->CFGR &= ~(1u << 16); /* PLL source HSI/2 */
+        RCC->CFGR &= ~(0xFu << 18);
+        RCC->CFGR |= (6u << 18); /* multiplier 6 */
+        flash_latency_cfg(24000000u);
+        RCC->CR |= (1u << 24); /* PLLON */
+        while ((RCC->CR & (1u << 25)) == 0u) {}
+        RCC->CFGR = (RCC->CFGR & ~3u) | 2u; /* PLL as SYSCLK */
+        sysclk_hz = 24000000u;
         return true;
     case RCC_SYSCLK_PLL_HSI_48MHZ:
         /* use HSI/2 * 12 = 48MHz */
@@ -17,9 +46,38 @@ bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg) {
         while ((RCC->CR & (1u << 1)) == 0u) {}
         RCC->CFGR &= ~(3u << 0); /* HSI as base */
         RCC->CFGR |= (12u << 18); /* PLL multiplier 12 */
+        RCC->CFGR &= ~(1u << 16); /* PLL source HSI/2 */
+        RCC->CFGR &= ~(0xFu << 18);
+        RCC->CFGR |= (12u << 18); /* multiplier 12 */
+        flash_latency_cfg(48000000u);
         RCC->CR |= (1u << 24); /* PLLON */
         while ((RCC->CR & (1u << 25)) == 0u) {}
         RCC->CFGR |= (2u << 0); /* PLL as SYSCLK */
+        RCC->CFGR = (RCC->CFGR & ~3u) | 2u;
+        sysclk_hz = 48000000u;
+        return true;
+    case RCC_SYSCLK_PLL_HSE_24MHZ:
+        RCC->CR |= (1u << 16); /* HSEON */
+        while ((RCC->CR & (1u << 17)) == 0u) {}
+        RCC->CFGR |= (1u << 16); /* PLL source HSE */
+        RCC->CFGR &= ~(0xFu << 18);
+        RCC->CFGR |= (3u << 18); /* multiplier 3 */
+        flash_latency_cfg(24000000u);
+        RCC->CR |= (1u << 24);
+        while ((RCC->CR & (1u << 25)) == 0u) {}
+        RCC->CFGR = (RCC->CFGR & ~3u) | 2u;
+        sysclk_hz = 24000000u;
+        return true;
+    case RCC_SYSCLK_PLL_HSE_48MHZ:
+        RCC->CR |= (1u << 16);
+        while ((RCC->CR & (1u << 17)) == 0u) {}
+        RCC->CFGR |= (1u << 16); /* PLL source HSE */
+        RCC->CFGR &= ~(0xFu << 18);
+        RCC->CFGR |= (6u << 18); /* multiplier 6 */
+        flash_latency_cfg(48000000u);
+        RCC->CR |= (1u << 24);
+        while ((RCC->CR & (1u << 25)) == 0u) {}
+        RCC->CFGR = (RCC->CFGR & ~3u) | 2u;
         sysclk_hz = 48000000u;
         return true;
     default:
@@ -63,6 +121,10 @@ bool rcc_sysclk_config_hse(uint32_t hse_hz, uint32_t desired_sysclk) {
 
 uint32_t rcc_sysclk_hz(void) {
     return sysclk_hz;
+}
+
+uint32_t rcc_flash_latency_ws(void) {
+    return FLASH->ACR & 0x7u;
 }
 
 void rcc_ahb_enable(uint32_t mask) {

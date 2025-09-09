@@ -7,10 +7,8 @@
 /* Forward declaration for host builds */
 typedef struct RTC_TypeDef RTC_TypeDef;
 
-#if defined(STM32F0_FIRMWARE)
 #define RTC_BASE 0x40002800u
 #define RTC ((RTC_TypeDef *)RTC_BASE)
-#endif
 
 typedef struct {
     uint16_t year;

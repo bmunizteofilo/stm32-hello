@@ -1,6 +1,5 @@
 #include "rtc.h"
 
-#if defined(STM32F0_FIRMWARE)
 struct RTC_TypeDef {
     volatile uint32_t TR;
     volatile uint32_t DR;
@@ -82,65 +81,3 @@ void rtc_example_wakeup(void) {
     rtc_set_wakeup(RTC, 5u);
 }
 
-#else
-static rtc_datetime_t current;
-static uint16_t wakeup_seconds;
-
-bool rtc_init(RTC_TypeDef *rtc) {
-    (void)rtc;
-    current = (rtc_datetime_t){0};
-    wakeup_seconds = 0u;
-    return true;
-}
-
-bool rtc_set_datetime(RTC_TypeDef *rtc, const rtc_datetime_t *dt) {
-    (void)rtc;
-    if (!dt) {
-        return false;
-    }
-    current = *dt;
-    return true;
-}
-
-bool rtc_get_datetime(RTC_TypeDef *rtc, rtc_datetime_t *dt) {
-    (void)rtc;
-    if (!dt) {
-        return false;
-    }
-    *dt = current;
-    return true;
-}
-
-bool rtc_set_wakeup(RTC_TypeDef *rtc, uint16_t seconds) {
-    (void)rtc;
-    if (seconds == 0u) {
-        return false;
-    }
-    wakeup_seconds = seconds;
-    return true;
-}
-
-void rtc_disable_wakeup(RTC_TypeDef *rtc) {
-    (void)rtc;
-    wakeup_seconds = 0u;
-}
-
-void rtc_example_basic(void) {
-    rtc_datetime_t dt = {
-        .year = 2024,
-        .month = 1,
-        .day = 1,
-        .hours = 0,
-        .minutes = 0,
-        .seconds = 0,
-    };
-    rtc_init((RTC_TypeDef *)0);
-    rtc_set_datetime((RTC_TypeDef *)0, &dt);
-}
-
-void rtc_example_wakeup(void) {
-    rtc_init((RTC_TypeDef *)0);
-    rtc_set_wakeup((RTC_TypeDef *)0, 5u);
-}
-
-#endif
