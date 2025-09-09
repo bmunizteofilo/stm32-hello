@@ -4,9 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#if defined(STM32F0_FIRMWARE)
 #define RCC_BASE 0x40021000u
-#endif
 
 typedef struct {
     volatile uint32_t CR;
@@ -25,9 +23,7 @@ typedef struct {
     volatile uint32_t CR2;
 } RCC_TypeDef;
 
-#if defined(STM32F0_FIRMWARE)
 #define RCC ((RCC_TypeDef *)RCC_BASE)
-#endif
 
 /* AHBENR bits */
 #define RCC_AHBENR_DMA1   (1u << 0)

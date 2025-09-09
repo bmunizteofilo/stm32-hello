@@ -1,6 +1,5 @@
 #include "rcc.h"
 
-#if defined(STM32F0_FIRMWARE)
 static uint32_t sysclk_hz = 8000000u;
 
 bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg) {
@@ -43,12 +42,4 @@ void rcc_apb1_enable(uint32_t mask) {
 void rcc_apb2_enable(uint32_t mask) {
     RCC->APB2ENR |= mask;
 }
-#else
-bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg) {
-    (void)cfg; return true;
-}
-uint32_t rcc_sysclk_hz(void) { return 8000000u; }
-void rcc_ahb_enable(uint32_t mask) { (void)mask; }
-void rcc_apb1_enable(uint32_t mask) { (void)mask; }
-void rcc_apb2_enable(uint32_t mask) { (void)mask; }
-#endif
+

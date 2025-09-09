@@ -9,10 +9,8 @@
 /* Forward declaration for host builds */
 typedef struct I2C_TypeDef I2C_TypeDef;
 
-#if defined(STM32F0_FIRMWARE)
 #define I2C1 ((I2C_TypeDef *)0x40005400u)
 #define I2C2 ((I2C_TypeDef *)0x40005800u)
-#endif
 
 enum i2c_addr_mode {
     I2C_ADDR_7BIT,

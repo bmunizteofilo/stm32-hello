@@ -4,7 +4,6 @@
  */
 #include "cm0.h"
 
-#if defined(STM32F0_FIRMWARE)
 
 /* Direct register addresses for Cortex-M0 core peripherals */
 #define NVIC_ISER    (*(volatile uint32_t *)0xE000E100u)
@@ -55,23 +54,3 @@ bool cm0_systick_config(uint32_t ticks) {
     return true;
 }
 
-#else /* STM32F0_FIRMWARE */
-
-void cm0_enable_irq_global(void) {}
-void cm0_disable_irq_global(void) {}
-void cm0_wfi(void) {}
-
-void cm0_nvic_enable(IRQn_Type irq) { (void)irq; }
-void cm0_nvic_disable(IRQn_Type irq) { (void)irq; }
-void cm0_nvic_set_pending(IRQn_Type irq) { (void)irq; }
-void cm0_nvic_clear_pending(IRQn_Type irq) { (void)irq; }
-void cm0_nvic_set_priority(IRQn_Type irq, uint8_t prio) {
-    (void)irq;
-    (void)prio;
-}
-bool cm0_systick_config(uint32_t ticks) {
-    (void)ticks;
-    return false;
-}
-
-#endif /* STM32F0_FIRMWARE */

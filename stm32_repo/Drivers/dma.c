@@ -1,7 +1,6 @@
 #include "dma.h"
 #include "cm0.h"
 
-#if defined(STM32F0_FIRMWARE)
 typedef struct { dma_cb_t cb; void *ctx; } dma_cb_entry_t;
 static dma_cb_entry_t dma_callbacks[7];
 
@@ -71,14 +70,3 @@ void DMA1_Channel2_3_IRQHandler(void) { dma_dispatch(2u); dma_dispatch(3u); }
 void DMA1_Channel4_5_IRQHandler(void) { dma_dispatch(4u); dma_dispatch(5u); }
 void DMA1_Channel6_7_IRQHandler(void) { dma_dispatch(6u); dma_dispatch(7u); }
 
-#else
-bool dma_config_channel(DMA_Channel_TypeDef *ch, uint32_t ccr) { (void)ch; (void)ccr; return true; }
-void dma_set_peripheral(DMA_Channel_TypeDef *ch, const void *addr) { (void)ch; (void)addr; }
-void dma_set_memory(DMA_Channel_TypeDef *ch, void *addr) { (void)ch; (void)addr; }
-void dma_set_count(DMA_Channel_TypeDef *ch, uint16_t count) { (void)ch; (void)count; }
-void dma_enable(DMA_Channel_TypeDef *ch, bool en) { (void)ch; (void)en; }
-void dma_set_callback(DMA_TypeDef *dma, uint8_t ch_idx, dma_cb_t cb, void *ctx) {
-    (void)dma; (void)ch_idx; (void)cb; (void)ctx; }
-uint32_t dma_get_isr(DMA_TypeDef *dma, uint8_t ch_idx) { (void)dma; (void)ch_idx; return 0u; }
-void dma_clear_isr(DMA_TypeDef *dma, uint8_t ch_idx, uint32_t flags) { (void)dma; (void)ch_idx; (void)flags; }
-#endif

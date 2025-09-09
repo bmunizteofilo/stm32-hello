@@ -8,14 +8,12 @@
 /* Forward declaration for host builds */
 typedef struct GPIO_TypeDef GPIO_TypeDef;
 
-#if defined(STM32F0_FIRMWARE)
 #define GPIOA ((GPIO_TypeDef *)0x48000000u)
 #define GPIOB ((GPIO_TypeDef *)0x48000400u)
 #define GPIOC ((GPIO_TypeDef *)0x48000800u)
 #define GPIOD ((GPIO_TypeDef *)0x48000C00u)
 #define GPIOE ((GPIO_TypeDef *)0x48001000u)
 #define GPIOF ((GPIO_TypeDef *)0x48001400u)
-#endif
 
 enum gpio_edge_t {
     GPIO_EDGE_NONE,

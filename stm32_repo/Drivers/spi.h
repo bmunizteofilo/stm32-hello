@@ -10,10 +10,8 @@
 typedef struct SPI_TypeDef SPI_TypeDef;
 typedef struct GPIO_TypeDef GPIO_TypeDef;
 
-#if defined(STM32F0_FIRMWARE)
 #define SPI1 ((SPI_TypeDef *)0x40013000u)
 #define SPI2 ((SPI_TypeDef *)0x40003800u)
-#endif
 
 enum spi_mode_t {
     SPI_MODE_MASTER,

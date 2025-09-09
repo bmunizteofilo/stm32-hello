@@ -7,7 +7,6 @@
 #include "gpio.h"
 #include "cm0.h"
 
-#if defined(STM32F0_FIRMWARE)
 
 typedef struct {
     volatile uint32_t CR1;
@@ -282,7 +281,7 @@ bool spi_transfer_dma_start(SPI_TypeDef *spi, DMA_Channel_TypeDef *tx_ch, DMA_Ch
     if (rx_ch && rx) {
         rcc_ahb_enable(RCC_AHBENR_DMA1);
         dma_config_channel(rx_ch, DMA_CCR_MINC | DMA_CCR_TCIE);
-        dma_set_peripheral(rx_ch, &s->DR);
+        dma_set_peripheral(rx_ch, (const void*)&s->DR);
         dma_set_memory(rx_ch, rx);
         dma_set_count(rx_ch, len);
         dma_set_callback(DMA1, dma_channel_index(rx_ch), spi_dma_cb, st);
@@ -291,7 +290,7 @@ bool spi_transfer_dma_start(SPI_TypeDef *spi, DMA_Channel_TypeDef *tx_ch, DMA_Ch
     if (tx_ch && tx) {
         rcc_ahb_enable(RCC_AHBENR_DMA1);
         dma_config_channel(tx_ch, DMA_CCR_MINC | DMA_CCR_DIR | DMA_CCR_TCIE);
-        dma_set_peripheral(tx_ch, &s->DR);
+        dma_set_peripheral(tx_ch, (const void*)&s->DR);
         dma_set_memory(tx_ch, (void *)tx);
         dma_set_count(tx_ch, len);
         dma_set_callback(DMA1, dma_channel_index(tx_ch), spi_dma_cb, st);
@@ -386,43 +385,3 @@ void spi_example_display_stream(const uint8_t *data, size_t len) {
         (void)spi_transfer(SPI1, data[i]);
     }
 }
-
-#else /* STM32F0_FIRMWARE */
-
-bool spi_init(SPI_TypeDef *spi, const spi_cfg_t *cfg) {
-    if (!spi || !cfg) return false;
-    if (cfg->datasize < 4u || cfg->datasize > 16u) return false;
-    return true;
-}
-void spi_enable(SPI_TypeDef *spi, bool enable) { (void)spi; (void)enable; }
-uint16_t spi_transfer(SPI_TypeDef *spi, uint16_t data) { (void)spi; return data; }
-void spi_enable_irq(SPI_TypeDef *spi, uint32_t mask) { (void)spi; (void)mask; }
-bool spi_attach_irq(SPI_TypeDef *spi, spi_cb_t cb, void *ctx) {
-    (void)spi; (void)cb; (void)ctx; return false;
-}
-void spi_detach_irq(SPI_TypeDef *spi) { (void)spi; }
-void spi_enable_dma(SPI_TypeDef *spi, bool rx, bool tx) {
-    (void)spi; (void)rx; (void)tx;
-}
-uint32_t spi_get_error(SPI_TypeDef *spi) { (void)spi; return 0u; }
-void spi_clear_error(SPI_TypeDef *spi, uint32_t errors) {
-    (void)spi; (void)errors;
-}
-void spi_cs_init(GPIO_TypeDef *port, uint8_t pin) {
-    (void)port; (void)pin;
-}
-void spi_cs_select(GPIO_TypeDef *port, uint8_t pin, bool select) {
-    (void)port; (void)pin; (void)select;
-}
-bool spi_transfer_it_start(SPI_TypeDef *spi, const uint16_t *tx, uint16_t *rx, size_t len, spi_xfer_cb_t cb, void *ctx) {
-    (void)spi; (void)tx; (void)rx; (void)len; (void)cb; (void)ctx; return false;
-}
-bool spi_transfer_dma_start(SPI_TypeDef *spi, DMA_Channel_TypeDef *tx_ch, DMA_Channel_TypeDef *rx_ch, const uint16_t *tx, uint16_t *rx, size_t len, spi_xfer_cb_t cb, void *ctx) {
-    (void)spi; (void)tx_ch; (void)rx_ch; (void)tx; (void)rx; (void)len; (void)cb; (void)ctx; return false;
-}
-void spi_example_jedec_id(void) {}
-void spi_example_display_stream(const uint8_t *data, size_t len) {
-    (void)data; (void)len;
-}
-
-#endif /* STM32F0_FIRMWARE */

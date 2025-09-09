@@ -6,7 +6,6 @@
 #include "rcc.h"
 #include "cm0.h"
 
-#if defined(STM32F0_FIRMWARE)
 struct GPIO_TypeDef {
     volatile uint32_t MODER;
     volatile uint32_t OTYPER;
@@ -288,33 +287,3 @@ void gpio_example_toggle(void) {
     gpio_toggle(GPIOC, 8);
 }
 
-#else /* STM32F0_FIRMWARE */
-
-void gpio_config(GPIO_TypeDef *port, uint8_t pin, const gpio_cfg_t *cfg) {
-    (void)port; (void)pin; (void)cfg;
-}
-void gpio_deinit(GPIO_TypeDef *port, uint8_t pin) { (void)port; (void)pin; }
-void gpio_write(GPIO_TypeDef *port, uint8_t pin, uint8_t level) {
-    (void)port; (void)pin; (void)level;
-}
-void gpio_toggle(GPIO_TypeDef *port, uint8_t pin) { (void)port; (void)pin; }
-uint8_t gpio_read(GPIO_TypeDef *port, uint8_t pin) {
-    (void)port; (void)pin; return 0u;
-}
-bool gpio_attach_irq(GPIO_TypeDef *port, uint8_t pin, enum gpio_edge_t edge,
-                     gpio_cb_t cb, void *ctx) {
-    (void)port; (void)pin; (void)edge; (void)cb; (void)ctx; return false;
-}
-void gpio_detach_irq(GPIO_TypeDef *port, uint8_t pin) {
-    (void)port; (void)pin;
-}
-void EXTI0_1_IRQHandler(void) {}
-void EXTI2_3_IRQHandler(void) {}
-void EXTI4_15_IRQHandler(void) {}
-
-void gpio_example_output(void) {}
-void gpio_example_input(void) {}
-void gpio_example_irq(void) {}
-void gpio_example_toggle(void) {}
-
-#endif /* STM32F0_FIRMWARE */
