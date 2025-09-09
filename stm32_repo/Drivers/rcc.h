@@ -4,9 +4,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define RCC_BASE 0x40021000u
-#define FLASH_BASE 0x40022000u
-
 typedef struct {
     volatile uint32_t CR;
     volatile uint32_t CFGR;
@@ -28,10 +25,17 @@ typedef struct {
     volatile uint32_t ACR;
 } FLASH_TypeDef;
 
+#ifdef STM32F0_FIRMWARE
+#define RCC_BASE   0x40021000u
+#define FLASH_BASE 0x40022000u
 #define RCC   ((RCC_TypeDef *)RCC_BASE)
 #define FLASH ((FLASH_TypeDef *)FLASH_BASE)
+#else
 extern RCC_TypeDef rcc_regs;
 extern FLASH_TypeDef flash_regs;
+#define RCC   (&rcc_regs)
+#define FLASH (&flash_regs)
+#endif
 
 /* AHBENR bits */
 #define RCC_AHBENR_DMA1   (1u << 0)
@@ -64,6 +68,11 @@ enum rcc_sysclk_cfg {
     RCC_SYSCLK_PLL_HSE_48MHZ,
 };
 
+/* MCO (Microcontroller Clock Output) configuration */
+#define RCC_CFGR_MCO_SHIFT   24u
+#define RCC_CFGR_MCO_MASK    (7u << RCC_CFGR_MCO_SHIFT)
+#define RCC_CFGR_MCO_SYSCLK  (4u << RCC_CFGR_MCO_SHIFT)
+
 bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg);
 bool rcc_sysclk_config_hse(uint32_t hse_hz, uint32_t sysclk_hz);
 uint32_t rcc_sysclk_hz(void);
@@ -72,5 +81,7 @@ uint32_t rcc_flash_latency_ws(void);
 void rcc_ahb_enable(uint32_t mask);
 void rcc_apb1_enable(uint32_t mask);
 void rcc_apb2_enable(uint32_t mask);
+
+void rcc_mco_enable_sysclk(void);
 
 #endif /* RCC_H */

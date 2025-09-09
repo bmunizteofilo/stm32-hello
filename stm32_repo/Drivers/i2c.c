@@ -147,6 +147,7 @@ bool i2c_write_it_start(I2C_TypeDef *i2c, uint8_t addr, const uint8_t *data, siz
 }
 
 bool i2c_read_it_start(I2C_TypeDef *i2c, uint8_t addr, uint8_t *data, size_t len, i2c_cb_t cb, void *ctx) {
+    (void)ctx;
     if (!i2c || !data || len == 0u || len >= I2C_IT_BUF_SIZE) return false;
     uint32_t idx = i2c_index(i2c);
     if (idx >= 2u) return false;
