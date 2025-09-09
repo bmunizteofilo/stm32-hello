@@ -22,6 +22,7 @@ typedef struct {
     volatile uint32_t TXDR;
 } I2C_TypeDef_real;
 
+/** Convert generic I2C pointer to register structure. */
 static inline I2C_TypeDef_real *i2c_real(I2C_TypeDef *i2c) {
     return (I2C_TypeDef_real *)i2c;
 }
@@ -32,21 +33,27 @@ typedef struct {
     size_t tail;
 } i2c_ring_t;
 
+/** Reset ring buffer state. */
 static void ring_reset(i2c_ring_t *r) { r->head = r->tail = 0u; }
+/** Check if ring buffer is empty. */
 static bool ring_empty(const i2c_ring_t *r) { return r->head == r->tail; }
+/** Check if ring buffer is full. */
 static bool ring_full(const i2c_ring_t *r) { return ((r->head + 1u) % I2C_IT_BUF_SIZE) == r->tail; }
+/** Push a byte into the ring buffer. */
 static bool ring_push(i2c_ring_t *r, uint8_t v) {
     if (ring_full(r)) return false;
     r->buf[r->head] = v;
     r->head = (r->head + 1u) % I2C_IT_BUF_SIZE;
     return true;
 }
+/** Pop a byte from the ring buffer. */
 static bool ring_pop(i2c_ring_t *r, uint8_t *v) {
     if (ring_empty(r)) return false;
     *v = r->buf[r->tail];
     r->tail = (r->tail + 1u) % I2C_IT_BUF_SIZE;
     return true;
 }
+/** Current number of bytes stored in ring buffer. */
 static size_t ring_count(const i2c_ring_t *r) {
     return (r->head + I2C_IT_BUF_SIZE - r->tail) % I2C_IT_BUF_SIZE;
 }
@@ -69,16 +76,19 @@ typedef struct {
 static i2c_it_state_t i2c_it_state[2];
 static i2c_dma_state_t i2c_dma_state[2];
 
+/** Translate I2C instance to index. */
 static uint32_t i2c_index(I2C_TypeDef *i2c) {
     if (i2c == I2C1) return 0u;
     if (i2c == I2C2) return 1u;
     return 2u;
 }
 
+/** Issue START condition with address and transfer size. */
 static void i2c_start(I2C_TypeDef_real *s, uint8_t addr, size_t nbytes, bool read) {
     s->CR2 = ((uint32_t)addr << 1) | (nbytes << 16) | (read ? (1u<<10) : 0u) | (1u<<13);
 }
 
+/** Initialize an I2C peripheral. */
 bool i2c_init(I2C_TypeDef *i2c, const i2c_cfg_t *cfg) {
     if (!i2c || !cfg) return false;
     I2C_TypeDef_real *s = i2c_real(i2c);
@@ -99,11 +109,13 @@ bool i2c_init(I2C_TypeDef *i2c, const i2c_cfg_t *cfg) {
     return true;
 }
 
+/** Enable or disable the I2C peripheral. */
 void i2c_enable(I2C_TypeDef *i2c, bool en) {
     I2C_TypeDef_real *s = i2c_real(i2c);
     if (en) s->CR1 |= 1u; else s->CR1 &= ~1u;
 }
 
+/** Perform blocking write transfer. */
 bool i2c_write_poll(I2C_TypeDef *i2c, uint8_t addr, const uint8_t *data, size_t len) {
     if (!i2c || !data || len == 0u) return false;
     I2C_TypeDef_real *s = i2c_real(i2c);
@@ -117,6 +129,7 @@ bool i2c_write_poll(I2C_TypeDef *i2c, uint8_t addr, const uint8_t *data, size_t 
     return true;
 }
 
+/** Perform blocking read transfer. */
 bool i2c_read_poll(I2C_TypeDef *i2c, uint8_t addr, uint8_t *data, size_t len) {
     if (!i2c || !data || len == 0u) return false;
     I2C_TypeDef_real *s = i2c_real(i2c);
@@ -129,6 +142,7 @@ bool i2c_read_poll(I2C_TypeDef *i2c, uint8_t addr, uint8_t *data, size_t len) {
     return true;
 }
 
+/** Start interrupt-driven write transfer. */
 bool i2c_write_it_start(I2C_TypeDef *i2c, uint8_t addr, const uint8_t *data, size_t len, i2c_cb_t cb, void *ctx) {
     if (!i2c || !data || len == 0u || len >= I2C_IT_BUF_SIZE) return false;
     uint32_t idx = i2c_index(i2c);
@@ -146,6 +160,7 @@ bool i2c_write_it_start(I2C_TypeDef *i2c, uint8_t addr, const uint8_t *data, siz
     return true;
 }
 
+/** Start interrupt-driven read transfer. */
 bool i2c_read_it_start(I2C_TypeDef *i2c, uint8_t addr, uint8_t *data, size_t len, i2c_cb_t cb, void *ctx) {
     (void)ctx;
     if (!i2c || !data || len == 0u || len >= I2C_IT_BUF_SIZE) return false;
@@ -163,10 +178,12 @@ bool i2c_read_it_start(I2C_TypeDef *i2c, uint8_t addr, uint8_t *data, size_t len
     return true;
 }
 
+/** Obtain DMA channel index (1-based). */
 static uint8_t dma_channel_index(DMA_Channel_TypeDef *ch) {
     return (uint8_t)(ch - &DMA1->CH[0]) + 1u;
 }
 
+/** DMA completion callback for I2C transfers. */
 static void i2c_dma_cb(void *ctx, uint32_t flags) {
     (void)flags;
     i2c_dma_state_t *st = (i2c_dma_state_t *)ctx;
@@ -178,6 +195,7 @@ static void i2c_dma_cb(void *ctx, uint32_t flags) {
     }
 }
 
+/** Start DMA-driven write transfer. */
 bool i2c_write_dma_start(I2C_TypeDef *i2c, DMA_Channel_TypeDef *tx_ch, uint8_t addr, const uint8_t *data, size_t len, i2c_cb_t cb, void *ctx) {
     if (!i2c || !tx_ch || !data || len == 0u) return false;
     uint32_t idx = i2c_index(i2c);
@@ -199,6 +217,7 @@ bool i2c_write_dma_start(I2C_TypeDef *i2c, DMA_Channel_TypeDef *tx_ch, uint8_t a
     return true;
 }
 
+/** Start DMA-driven read transfer. */
 bool i2c_read_dma_start(I2C_TypeDef *i2c, DMA_Channel_TypeDef *rx_ch, uint8_t addr, uint8_t *data, size_t len, i2c_cb_t cb, void *ctx) {
     if (!i2c || !rx_ch || !data || len == 0u) return false;
     uint32_t idx = i2c_index(i2c);
@@ -220,6 +239,7 @@ bool i2c_read_dma_start(I2C_TypeDef *i2c, DMA_Channel_TypeDef *rx_ch, uint8_t ad
     return true;
 }
 
+/** Dispatch I2C interrupt events to state machine. */
 static void i2c_irq_dispatch(uint32_t idx) {
     I2C_TypeDef_real *s = i2c_real(idx == 0u ? I2C1 : I2C2);
     i2c_it_state_t *st = &i2c_it_state[idx];
@@ -250,14 +270,18 @@ static void i2c_irq_dispatch(uint32_t idx) {
     }
 }
 
+/** I2C1 global interrupt handler. */
 void I2C1_IRQHandler(void) { i2c_irq_dispatch(0u); }
+/** I2C2 global interrupt handler. */
 void I2C2_IRQHandler(void) { i2c_irq_dispatch(1u); }
 
+/** Example: blocking write transfer. */
 void i2c_example_write_poll(void) {
     uint8_t data[2] = {0xAA, 0x55};
     (void)i2c_write_poll(I2C1, 0x50u, data, 2u);
 }
 
+/** Example: blocking read transfer. */
 void i2c_example_read_poll(void) {
     uint8_t data[2];
     (void)i2c_read_poll(I2C1, 0x50u, data, 2u);
@@ -265,21 +289,25 @@ void i2c_example_read_poll(void) {
 
 static void it_cb(void *ctx) { (void)ctx; }
 
+/** Example: interrupt-driven write transfer. */
 void i2c_example_write_it(void) {
     static uint8_t data[3] = {1,2,3};
     i2c_write_it_start(I2C1, 0x50u, data, 3u, it_cb, NULL);
 }
 
+/** Example: interrupt-driven read transfer. */
 void i2c_example_read_it(void) {
     static uint8_t data[3];
     i2c_read_it_start(I2C1, 0x50u, data, 3u, it_cb, data);
 }
 
+/** Example: DMA write transfer. */
 void i2c_example_write_dma(void) {
     static uint8_t data[4] = {1,2,3,4};
     i2c_write_dma_start(I2C1, &DMA1->CH[2], 0x50u, data, 4u, it_cb, NULL);
 }
 
+/** Example: DMA read transfer. */
 void i2c_example_read_dma(void) {
     static uint8_t data[4];
     i2c_read_dma_start(I2C1, &DMA1->CH[3], 0x50u, data, 4u, it_cb, NULL);

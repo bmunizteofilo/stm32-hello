@@ -7,6 +7,7 @@ FLASH_TypeDef flash_regs;
 
 static uint32_t sysclk_hz = 8000000u;
 
+/** Configure flash latency based on system clock. */
 static void flash_latency_cfg(uint32_t hz) {
     if (hz > 24000000u) {
         FLASH->ACR = 1u; /* 1 wait state */
@@ -15,6 +16,7 @@ static void flash_latency_cfg(uint32_t hz) {
     }
 }
 
+/** Configure system clock using predefined settings. */
 bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg) {
     switch (cfg) {
     case RCC_SYSCLK_HSI8:
@@ -90,6 +92,12 @@ bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg) {
     }
 }
 
+/**
+ * @brief Configure system clock from external oscillator.
+ * @param hse_hz Frequency of external crystal.
+ * @param desired_sysclk Desired system clock frequency.
+ * @return true on success, false on invalid parameters.
+ */
 bool rcc_sysclk_config_hse(uint32_t hse_hz, uint32_t desired_sysclk) {
     if (hse_hz == 0u || desired_sysclk == 0u) {
         return false;
@@ -124,27 +132,32 @@ bool rcc_sysclk_config_hse(uint32_t hse_hz, uint32_t desired_sysclk) {
     return true;
 }
 
+/** Get current system clock frequency. */
 uint32_t rcc_sysclk_hz(void) {
     return sysclk_hz;
 }
 
+/** Retrieve current flash wait state configuration. */
 uint32_t rcc_flash_latency_ws(void) {
     return FLASH->ACR & 0x7u;
 }
 
+/** Enable AHB peripheral clocks. */
 void rcc_ahb_enable(uint32_t mask) {
     RCC->AHBENR |= mask;
 }
 
+/** Enable APB1 peripheral clocks. */
 void rcc_apb1_enable(uint32_t mask) {
     RCC->APB1ENR |= mask;
 }
 
+/** Enable APB2 peripheral clocks. */
 void rcc_apb2_enable(uint32_t mask) {
     RCC->APB2ENR |= mask;
 }
 
+/** Route system clock to MCO pin without prescaler. */
 void rcc_mco_enable_sysclk(void) {
-    /* route system clock to MCO pin without prescaler */
     RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_MCO_MASK) | RCC_CFGR_MCO_SYSCLK;
 }

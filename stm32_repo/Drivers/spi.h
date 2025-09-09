@@ -55,7 +55,6 @@ enum spi_nss_t {
 #define SPI_ERROR_UDR   0x4u
 #define SPI_ERROR_CRC   0x8u
 
-typedef void (*spi_cb_t)(void *ctx, uint32_t sr);
 
 typedef struct {
     enum spi_mode_t mode;
@@ -69,23 +68,41 @@ typedef struct {
     uint16_t crc_poly;
 } spi_cfg_t;
 
-bool spi_init(SPI_TypeDef *spi, const spi_cfg_t *cfg);
-void spi_enable(SPI_TypeDef *spi, bool enable);
-uint16_t spi_transfer(SPI_TypeDef *spi, uint16_t data);
-void spi_enable_irq(SPI_TypeDef *spi, uint32_t mask);
-bool spi_attach_irq(SPI_TypeDef *spi, spi_cb_t cb, void *ctx);
-void spi_detach_irq(SPI_TypeDef *spi);
-void spi_enable_dma(SPI_TypeDef *spi, bool rx, bool tx);
-uint32_t spi_get_error(SPI_TypeDef *spi);
-void spi_clear_error(SPI_TypeDef *spi, uint32_t errors);
-void spi_cs_init(GPIO_TypeDef *port, uint8_t pin);
-void spi_cs_select(GPIO_TypeDef *port, uint8_t pin, bool select);
-
-typedef void (*spi_xfer_cb_t)(void *ctx);
-bool spi_transfer_it_start(SPI_TypeDef *spi, const uint16_t *tx, uint16_t *rx, size_t len, spi_xfer_cb_t cb, void *ctx);
-bool spi_transfer_dma_start(SPI_TypeDef *spi, DMA_Channel_TypeDef *tx_ch, DMA_Channel_TypeDef *rx_ch, const uint16_t *tx, uint16_t *rx, size_t len, spi_xfer_cb_t cb, void *ctx);
-
-void spi_example_jedec_id(void);
-void spi_example_display_stream(const uint8_t *data, size_t len);
+/** Callback type for SPI interrupts. */
+typedef void (*spi_cb_t)(void *ctx, uint32_t sr);
 
 #endif /* SPI_H */
+/** Initialize an SPI peripheral. */
+bool spi_init(SPI_TypeDef *spi, const spi_cfg_t *cfg);
+/** Enable or disable SPI. */
+void spi_enable(SPI_TypeDef *spi, bool enable);
+/** Transfer a word over SPI in polling mode. */
+uint16_t spi_transfer(SPI_TypeDef *spi, uint16_t data);
+/** Enable specific SPI interrupts. */
+void spi_enable_irq(SPI_TypeDef *spi, uint32_t mask);
+/** Register an SPI interrupt callback. */
+bool spi_attach_irq(SPI_TypeDef *spi, spi_cb_t cb, void *ctx);
+/** Detach SPI interrupt callback. */
+void spi_detach_irq(SPI_TypeDef *spi);
+/** Enable or disable DMA for SPI. */
+void spi_enable_dma(SPI_TypeDef *spi, bool rx, bool tx);
+/** Retrieve error flags from SPI. */
+uint32_t spi_get_error(SPI_TypeDef *spi);
+/** Clear specific SPI error flags. */
+void spi_clear_error(SPI_TypeDef *spi, uint32_t errors);
+/** Initialize a GPIO pin as chip-select. */
+void spi_cs_init(GPIO_TypeDef *port, uint8_t pin);
+/** Control the chip-select pin. */
+void spi_cs_select(GPIO_TypeDef *port, uint8_t pin, bool select);
+
+/** Callback type for asynchronous SPI transfers. */
+typedef void (*spi_xfer_cb_t)(void *ctx);
+/** Start interrupt-driven SPI transfer. */
+bool spi_transfer_it_start(SPI_TypeDef *spi, const uint16_t *tx, uint16_t *rx, size_t len, spi_xfer_cb_t cb, void *ctx);
+/** Start DMA-driven SPI transfer. */
+bool spi_transfer_dma_start(SPI_TypeDef *spi, DMA_Channel_TypeDef *tx_ch, DMA_Channel_TypeDef *rx_ch, const uint16_t *tx, uint16_t *rx, size_t len, spi_xfer_cb_t cb, void *ctx);
+
+/** Example: read JEDEC ID from SPI flash. */
+void spi_example_jedec_id(void);
+/** Example: stream data to SPI peripheral. */
+void spi_example_display_stream(const uint8_t *data, size_t len);

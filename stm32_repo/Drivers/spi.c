@@ -20,6 +20,7 @@ typedef struct {
     volatile uint32_t I2SPR;
 } SPI_TypeDef_real;
 
+/** Convert generic SPI pointer to register structure. */
 static inline SPI_TypeDef_real *spi_real(SPI_TypeDef *spi) {
     return (SPI_TypeDef_real *)spi;
 }
@@ -51,12 +52,14 @@ typedef struct {
 static spi_it_state_t spi_it_state[2];
 static spi_dma_state_t spi_dma_state[2];
 
+/** Translate SPI instance to index (0 or 1). */
 static uint32_t spi_index(SPI_TypeDef *spi) {
     if (spi == SPI1) return 0u;
     if (spi == SPI2) return 1u;
     return 2u;
 }
 
+/** Initialize an SPI peripheral with configuration. */
 bool spi_init(SPI_TypeDef *spi, const spi_cfg_t *cfg) {
     if (!spi || !cfg) {
         return false;
@@ -121,6 +124,7 @@ bool spi_init(SPI_TypeDef *spi, const spi_cfg_t *cfg) {
     return true;
 }
 
+/** Enable or disable the SPI peripheral. */
 void spi_enable(SPI_TypeDef *spi, bool enable) {
     SPI_TypeDef_real *s = spi_real(spi);
     if (enable) {
@@ -130,6 +134,7 @@ void spi_enable(SPI_TypeDef *spi, bool enable) {
     }
 }
 
+/** Perform a blocking SPI transfer. */
 uint16_t spi_transfer(SPI_TypeDef *spi, uint16_t data) {
     SPI_TypeDef_real *s = spi_real(spi);
     while ((s->SR & (1u << 1)) == 0u) {
@@ -140,6 +145,7 @@ uint16_t spi_transfer(SPI_TypeDef *spi, uint16_t data) {
     return (uint16_t)s->DR;
 }
 
+/** Enable specific SPI interrupts. */
 void spi_enable_irq(SPI_TypeDef *spi, uint32_t mask) {
     SPI_TypeDef_real *s = spi_real(spi);
     uint32_t cr2 = s->CR2;
@@ -165,6 +171,7 @@ void spi_enable_irq(SPI_TypeDef *spi, uint32_t mask) {
     }
 }
 
+/** Register a callback for SPI interrupts. */
 bool spi_attach_irq(SPI_TypeDef *spi, spi_cb_t cb, void *ctx) {
     uint32_t idx = spi_index(spi);
     if (idx >= 2u) {
@@ -175,6 +182,7 @@ bool spi_attach_irq(SPI_TypeDef *spi, spi_cb_t cb, void *ctx) {
     return true;
 }
 
+/** Remove SPI interrupt callback. */
 void spi_detach_irq(SPI_TypeDef *spi) {
     uint32_t idx = spi_index(spi);
     if (idx < 2u) {
@@ -184,6 +192,7 @@ void spi_detach_irq(SPI_TypeDef *spi) {
     }
 }
 
+/** Enable or disable DMA requests. */
 void spi_enable_dma(SPI_TypeDef *spi, bool rx, bool tx) {
     SPI_TypeDef_real *s = spi_real(spi);
     uint32_t cr2 = s->CR2;
@@ -200,6 +209,7 @@ void spi_enable_dma(SPI_TypeDef *spi, bool rx, bool tx) {
     s->CR2 = cr2;
 }
 
+/** Retrieve SPI error flags. */
 uint32_t spi_get_error(SPI_TypeDef *spi) {
     SPI_TypeDef_real *s = spi_real(spi);
     uint32_t sr = s->SR;
@@ -211,6 +221,7 @@ uint32_t spi_get_error(SPI_TypeDef *spi) {
     return err;
 }
 
+/** Clear specified SPI error flags. */
 void spi_clear_error(SPI_TypeDef *spi, uint32_t errors) {
     SPI_TypeDef_real *s = spi_real(spi);
     if (errors & SPI_ERROR_OVR) {
@@ -229,6 +240,7 @@ void spi_clear_error(SPI_TypeDef *spi, uint32_t errors) {
     }
 }
 
+/** Start interrupt-driven SPI transfer. */
 bool spi_transfer_it_start(SPI_TypeDef *spi, const uint16_t *tx, uint16_t *rx, size_t len, spi_xfer_cb_t cb, void *ctx) {
     if (!spi || len == 0u) return false;
     uint32_t idx_spi = spi_index(spi);
@@ -252,10 +264,12 @@ bool spi_transfer_it_start(SPI_TypeDef *spi, const uint16_t *tx, uint16_t *rx, s
     return true;
 }
 
+/** Obtain DMA channel index for the given channel. */
 static uint8_t dma_channel_index(DMA_Channel_TypeDef *ch) {
     return (uint8_t)(ch - &DMA1->CH[0]) + 1u;
 }
 
+/** DMA completion callback for SPI transfers. */
 static void spi_dma_cb(void *ctx, uint32_t flags) {
     (void)flags;
     spi_dma_state_t *st = (spi_dma_state_t *)ctx;
@@ -268,6 +282,7 @@ static void spi_dma_cb(void *ctx, uint32_t flags) {
     }
 }
 
+/** Start DMA-driven SPI transfer. */
 bool spi_transfer_dma_start(SPI_TypeDef *spi, DMA_Channel_TypeDef *tx_ch, DMA_Channel_TypeDef *rx_ch, const uint16_t *tx, uint16_t *rx, size_t len, spi_xfer_cb_t cb, void *ctx) {
     if (!spi || len == 0u) return false;
     uint32_t idx_spi = spi_index(spi);
@@ -303,6 +318,7 @@ bool spi_transfer_dma_start(SPI_TypeDef *spi, DMA_Channel_TypeDef *tx_ch, DMA_Ch
     return true;
 }
 
+/** Initialize a GPIO as chip-select output. */
 void spi_cs_init(GPIO_TypeDef *port, uint8_t pin) {
     gpio_config(port, pin, &(gpio_cfg_t){
         .mode = GPIO_MODE_OUTPUT,
@@ -312,10 +328,12 @@ void spi_cs_init(GPIO_TypeDef *port, uint8_t pin) {
     gpio_write(port, pin, 1u);
 }
 
+/** Control the chip-select line. */
 void spi_cs_select(GPIO_TypeDef *port, uint8_t pin, bool select) {
     gpio_write(port, pin, select ? 0u : 1u);
 }
 
+/** Dispatch SPI interrupts to registered callbacks. */
 static void spi_irq_dispatch(uint32_t idx) {
     SPI_TypeDef_real *s = spi_real(idx == 0u ? SPI1 : SPI2);
     uint32_t sr = s->SR;
@@ -351,9 +369,12 @@ static void spi_irq_dispatch(uint32_t idx) {
     }
 }
 
+/** SPI1 global interrupt handler. */
 void SPI1_IRQHandler(void) { spi_irq_dispatch(0u); }
+/** SPI2 global interrupt handler. */
 void SPI2_IRQHandler(void) { spi_irq_dispatch(1u); }
 
+/** Example: read JEDEC ID from SPI device. */
 void spi_example_jedec_id(void) {
     spi_cfg_t cfg = {
         .mode = SPI_MODE_MASTER,
@@ -377,6 +398,7 @@ void spi_example_jedec_id(void) {
     (void)id;
 }
 
+/** Example: send a stream of bytes over SPI. */
 void spi_example_display_stream(const uint8_t *data, size_t len) {
     if (!data) {
         return;

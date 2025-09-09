@@ -45,6 +45,9 @@ typedef struct {
 
 static gpio_irq_entry_t gpio_irq_table[16];
 
+/**
+ * @brief Convert a GPIO port pointer to its index (A=0,...F=5).
+ */
 static uint8_t gpio_port_index(GPIO_TypeDef *port) {
     if (port == GPIOA) return 0;
     if (port == GPIOB) return 1;
@@ -55,6 +58,9 @@ static uint8_t gpio_port_index(GPIO_TypeDef *port) {
     return 0xFF;
 }
 
+/**
+ * @brief Compute RCC AHB mask for a given GPIO port.
+ */
 static uint32_t gpio_rcc_mask(GPIO_TypeDef *port) {
     uint8_t idx = gpio_port_index(port);
     if (idx > 5) {
@@ -63,6 +69,12 @@ static uint32_t gpio_rcc_mask(GPIO_TypeDef *port) {
     return 1u << (17U + idx);
 }
 
+/**
+ * @brief Configure a GPIO pin.
+ * @param port GPIO port base.
+ * @param pin  Pin number.
+ * @param cfg  Configuration parameters.
+ */
 void gpio_config(GPIO_TypeDef *port, uint8_t pin, const gpio_cfg_t *cfg) {
     uint32_t bit = 1u << pin;
     uint32_t shift = (uint32_t)pin * 2u;
@@ -89,6 +101,11 @@ void gpio_config(GPIO_TypeDef *port, uint8_t pin, const gpio_cfg_t *cfg) {
     }
 }
 
+/**
+ * @brief Reset a GPIO pin to default state.
+ * @param port GPIO port base.
+ * @param pin  Pin number.
+ */
 void gpio_deinit(GPIO_TypeDef *port, uint8_t pin) {
     uint32_t shift = (uint32_t)pin * 2u;
     uint32_t bit = 1u << pin;
@@ -101,6 +118,9 @@ void gpio_deinit(GPIO_TypeDef *port, uint8_t pin) {
     port->AFR[afr_idx] &= ~(0xFu << afr_shift);
 }
 
+/**
+ * @brief Write an output level to a GPIO pin.
+ */
 void gpio_write(GPIO_TypeDef *port, uint8_t pin, uint8_t level) {
     uint32_t bit = 1u << pin;
     if (level) {
@@ -110,14 +130,28 @@ void gpio_write(GPIO_TypeDef *port, uint8_t pin, uint8_t level) {
     }
 }
 
+/** Toggle the state of a GPIO pin. */
 void gpio_toggle(GPIO_TypeDef *port, uint8_t pin) {
     port->ODR ^= 1u << pin;
 }
 
+/**
+ * @brief Read the current level of a GPIO pin.
+ * @return 0 or 1 representing pin level.
+ */
 uint8_t gpio_read(GPIO_TypeDef *port, uint8_t pin) {
     return (uint8_t)((port->IDR >> pin) & 1u);
 }
 
+/**
+ * @brief Attach an interrupt callback to a GPIO pin.
+ * @param port GPIO port base.
+ * @param pin  Pin number.
+ * @param edge Trigger edge configuration.
+ * @param cb   Callback invoked on interrupt.
+ * @param ctx  User context.
+ * @return true on success, false otherwise.
+ */
 bool gpio_attach_irq(GPIO_TypeDef *port, uint8_t pin, enum gpio_edge_t edge,
                      gpio_cb_t cb, void *ctx) {
     if (pin > 15) {
@@ -174,6 +208,9 @@ bool gpio_attach_irq(GPIO_TypeDef *port, uint8_t pin, enum gpio_edge_t edge,
     return true;
 }
 
+/**
+ * @brief Detach interrupt callback from a GPIO pin.
+ */
 void gpio_detach_irq(GPIO_TypeDef *port, uint8_t pin) {
     (void)port;
     if (pin > 15) {
@@ -205,6 +242,9 @@ void gpio_detach_irq(GPIO_TypeDef *port, uint8_t pin) {
     }
 }
 
+/**
+ * @brief Dispatch pending EXTI interrupts to callbacks.
+ */
 static void gpio_dispatch(uint32_t pending, uint8_t base) {
     for (uint8_t i = 0; i < 2 && (base + i) < 16; ++i) {
         if (pending & (1u << (base + i))) {
@@ -216,18 +256,21 @@ static void gpio_dispatch(uint32_t pending, uint8_t base) {
     }
 }
 
+/** EXTI lines 0 and 1 interrupt handler. */
 void EXTI0_1_IRQHandler(void) {
     uint32_t pending = EXTI->PR & 0x3u;
     EXTI->PR = pending;
     gpio_dispatch(pending, 0);
 }
 
+/** EXTI lines 2 and 3 interrupt handler. */
 void EXTI2_3_IRQHandler(void) {
     uint32_t pending = EXTI->PR & 0xCu;
     EXTI->PR = pending;
     gpio_dispatch(pending, 2);
 }
 
+/** EXTI lines 4 to 15 interrupt handler. */
 void EXTI4_15_IRQHandler(void) {
     uint32_t pending = EXTI->PR & 0xFFF0u;
     EXTI->PR = pending;
@@ -242,6 +285,7 @@ void EXTI4_15_IRQHandler(void) {
 }
 
 /* Example: configure PC8 push-pull and PC9 open-drain */
+/** Example: configure PC8 and PC9 as outputs. */
 void gpio_example_output(void) {
     gpio_config(GPIOC, 8, &(gpio_cfg_t){
         .mode = GPIO_MODE_OUTPUT,
@@ -260,6 +304,7 @@ void gpio_example_output(void) {
 }
 
 /* Example: configure PA0 as input with pull-down */
+/** Example: configure PA0 as input. */
 void gpio_example_input(void) {
     gpio_config(GPIOA, 0, &(gpio_cfg_t){
         .mode = GPIO_MODE_INPUT,
@@ -268,12 +313,14 @@ void gpio_example_input(void) {
 }
 
 /* Example callback toggles PC9 on PA1 interrupt */
+/** Example callback toggling PC9. */
 static void gpio_example_cb(void *ctx, uint8_t pin) {
     (void)ctx; (void)pin;
     gpio_toggle(GPIOC, 9);
 }
 
 /* Example: attach rising-edge IRQ on PA1 */
+/** Example: attach rising edge interrupt on PA1. */
 void gpio_example_irq(void) {
     gpio_config(GPIOA, 1, &(gpio_cfg_t){
         .mode = GPIO_MODE_INPUT,
@@ -283,6 +330,7 @@ void gpio_example_irq(void) {
 }
 
 /* Example: toggle PC8 */
+/** Example: toggle PC8. */
 void gpio_example_toggle(void) {
     gpio_toggle(GPIOC, 8);
 }

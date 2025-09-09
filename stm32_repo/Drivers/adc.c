@@ -12,6 +12,12 @@ static void *adc_ctx;
 
 ADC_TypeDef adc1_regs;
 
+/**
+ * @brief Initialize the ADC peripheral with the provided configuration.
+ * @param adc Pointer to the ADC instance.
+ * @param cfg Configuration parameters.
+ * @return true on success, false on invalid arguments.
+ */
 bool adc_init(ADC_TypeDef *adc, const adc_cfg_t *cfg) {
     if (!adc || !cfg) {
         return false;
@@ -32,6 +38,13 @@ bool adc_init(ADC_TypeDef *adc, const adc_cfg_t *cfg) {
     return true;
 }
 
+/**
+ * @brief Perform a single conversion using polling.
+ * @param adc     Pointer to the ADC instance.
+ * @param channel Channel to sample.
+ * @param value   Destination for conversion result.
+ * @return true on success, false on invalid arguments.
+ */
 bool adc_read_poll(ADC_TypeDef *adc, uint8_t channel, uint16_t *value) {
     if (!adc || !value) {
         return false;
@@ -44,6 +57,14 @@ bool adc_read_poll(ADC_TypeDef *adc, uint8_t channel, uint16_t *value) {
     return true;
 }
 
+/**
+ * @brief Start a conversion and notify via interrupt callback.
+ * @param adc     Pointer to the ADC instance.
+ * @param channel Channel to sample.
+ * @param cb      Callback invoked when conversion completes.
+ * @param ctx     User context passed to callback.
+ * @return true on success, false otherwise.
+ */
 bool adc_start_it(ADC_TypeDef *adc, uint8_t channel, adc_cb_t cb, void *ctx) {
     if (!adc || !cb) {
         return false;
@@ -57,6 +78,15 @@ bool adc_start_it(ADC_TypeDef *adc, uint8_t channel, adc_cb_t cb, void *ctx) {
     return true;
 }
 
+/**
+ * @brief Start a DMA transfer for repeated conversions.
+ * @param adc     Pointer to the ADC instance.
+ * @param dma_ch  DMA channel used for transfers.
+ * @param channel Channel to sample.
+ * @param buf     Buffer to fill with samples.
+ * @param len     Number of samples to capture.
+ * @return true on success, false otherwise.
+ */
 bool adc_start_dma(ADC_TypeDef *adc, DMA_Channel_TypeDef *dma_ch, uint8_t channel,
                    uint16_t *buf, size_t len) {
     if (!adc || !dma_ch || !buf || len == 0u) {
@@ -72,6 +102,7 @@ bool adc_start_dma(ADC_TypeDef *adc, DMA_Channel_TypeDef *dma_ch, uint8_t channe
     return true;
 }
 
+/** ADC interrupt handler for conversion completion. */
 void ADC1_IRQHandler(void) {
     if ((ADC1->ISR & ADC_ISR_EOC) && adc_cb) {
         uint16_t val = (uint16_t)ADC1->DR;
@@ -81,11 +112,13 @@ void ADC1_IRQHandler(void) {
 }
 
 /* Example functions demonstrating usage */
+/** Dummy callback used in usage examples. */
 static void adc_dummy_cb(void *ctx, uint16_t v) {
     (void)ctx;
     (void)v;
 }
 
+/** Example: polling conversion triggered by software. */
 void adc_example_poll_sw(void) {
     adc_cfg_t cfg = {
         .resolution = ADC_RES_12BIT,
@@ -98,6 +131,7 @@ void adc_example_poll_sw(void) {
     adc_read_poll(ADC1, 5u, &value);
 }
 
+/** Example: polling conversion triggered by hardware. */
 void adc_example_poll_hw(void) {
     adc_cfg_t cfg = {
         .resolution = ADC_RES_12BIT,
@@ -110,6 +144,7 @@ void adc_example_poll_hw(void) {
     adc_read_poll(ADC1, 3u, &value);
 }
 
+/** Example: interrupt conversion triggered by software. */
 void adc_example_it_sw(void) {
     adc_cfg_t cfg = {
         .resolution = ADC_RES_8BIT,
@@ -121,6 +156,7 @@ void adc_example_it_sw(void) {
     adc_start_it(ADC1, 0u, adc_dummy_cb, NULL);
 }
 
+/** Example: interrupt conversion triggered by hardware. */
 void adc_example_it_hw(void) {
     adc_cfg_t cfg = {
         .resolution = ADC_RES_10BIT,
@@ -132,6 +168,7 @@ void adc_example_it_hw(void) {
     adc_start_it(ADC1, 1u, adc_dummy_cb, NULL);
 }
 
+/** Example: DMA conversion triggered by software. */
 void adc_example_dma_sw(void) {
     uint16_t buffer[8];
     adc_cfg_t cfg = {
@@ -145,6 +182,7 @@ void adc_example_dma_sw(void) {
     adc_start_dma(ADC1, &ch, 2u, buffer, 8u);
 }
 
+/** Example: DMA conversion triggered by hardware. */
 void adc_example_dma_hw(void) {
     uint16_t buffer[4];
     adc_cfg_t cfg = {

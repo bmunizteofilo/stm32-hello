@@ -77,34 +77,46 @@ typedef struct {
 
 typedef void (*tim_cb_t)(void *ctx);
 
+/** Initialize a timer with basic configuration. */
 bool tim_init(TIM_TypeDef *tim, const tim_cfg_t *cfg);
+/** Enable or disable a timer. */
 void tim_enable(TIM_TypeDef *tim, bool en);
 
+/** Configure an output compare channel. */
 bool tim_config_output(TIM_TypeDef *tim, uint8_t ch, const tim_oc_cfg_t *cfg);
+/** Update compare value for an output channel. */
 void tim_set_compare(TIM_TypeDef *tim, uint8_t ch, uint32_t compare);
 
+/** Configure an input capture channel. */
 bool tim_config_input(TIM_TypeDef *tim, uint8_t ch, const tim_ic_cfg_t *cfg);
+/** Read captured value from a channel. */
 uint32_t tim_get_capture(TIM_TypeDef *tim, uint8_t ch);
 
+/** Enable or disable DMA requests for selected events. */
 void tim_enable_dma(TIM_TypeDef *tim, uint32_t mask, bool en);
 
+/** Register callback for update interrupt. */
 void tim_attach_update_irq(TIM_TypeDef *tim, tim_cb_t cb, void *ctx);
+/** Register callback for capture/compare interrupt. */
 void tim_attach_cc_irq(TIM_TypeDef *tim, uint8_t ch, tim_cb_t cb, void *ctx);
+/** Detach update interrupt callback. */
 void tim_detach_update_irq(TIM_TypeDef *tim);
+/** Detach capture/compare interrupt callback. */
 void tim_detach_cc_irq(TIM_TypeDef *tim, uint8_t ch);
 
 extern volatile uint32_t tim_ic_last_period;
 
 /* Exemplo: gera PWM no TIM3 canal 1 (PA6) */
+/** Example: generate PWM on TIM3 channel 1. */
 void tim_example_pwm(void);
 
-/* Exemplo: captura de entrada no TIM3 canal 2 (PA7) com LED em PC9 */
+/** Example: input capture on TIM3 channel 2. */
 void tim_example_input_capture(void);
 
-/* Exemplo: interrupção periódica via atualização do timer (pisca PC8) */
+/** Example: periodic update interrupt (blink LED). */
 void tim_example_update_irq(void);
 
-/* Exemplo: PWM de 50 Hz para servo no TIM3 canal 3 (PB0) */
+/** Example: servo control using PWM on TIM3 channel 3. */
 void tim_example_servo_pwm(void);
 
 #endif /* TIM_H */

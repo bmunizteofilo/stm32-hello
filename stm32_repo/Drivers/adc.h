@@ -19,7 +19,12 @@ typedef struct {
 } ADC_TypeDef;
 
 #define ADC1_BASE 0x40012400u
+#ifdef STM32F0_FIRMWARE
 #define ADC1 ((ADC_TypeDef *)ADC1_BASE)
+#else
+extern ADC_TypeDef adc1_regs;
+#define ADC1 (&adc1_regs)
+#endif
 
 /* ADC interrupt flags */
 #define ADC_ISR_ADRDY (1u << 0)
@@ -84,22 +89,62 @@ typedef struct {
     enum adc_trigger_edge trigger_edge;
 } adc_cfg_t;
 
+/** Callback type for ADC conversion completion. */
 typedef void (*adc_cb_t)(void *ctx, uint16_t value);
 
+/**
+ * @brief Initialize an ADC peripheral.
+ * @param adc  Pointer to ADC instance.
+ * @param cfg  Configuration parameters.
+ * @return true on success, false on invalid arguments.
+ */
 bool adc_init(ADC_TypeDef *adc, const adc_cfg_t *cfg);
+
+/**
+ * @brief Perform a polling conversion on a channel.
+ * @param adc     Pointer to ADC instance.
+ * @param channel Channel number to sample.
+ * @param value   Output pointer for the conversion result.
+ * @return true on success, false on invalid arguments.
+ */
 bool adc_read_poll(ADC_TypeDef *adc, uint8_t channel, uint16_t *value);
+
+/**
+ * @brief Start an interrupt-driven conversion.
+ * @param adc     Pointer to ADC instance.
+ * @param channel Channel number to sample.
+ * @param cb      Completion callback.
+ * @param ctx     User context passed to callback.
+ * @return true on success, false on invalid arguments.
+ */
 bool adc_start_it(ADC_TypeDef *adc, uint8_t channel, adc_cb_t cb, void *ctx);
+
+/**
+ * @brief Start a DMA-based conversion sequence.
+ * @param adc     Pointer to ADC instance.
+ * @param dma_ch  DMA channel used for transfers.
+ * @param channel Channel number to sample.
+ * @param buf     Destination buffer.
+ * @param len     Number of samples to capture.
+ * @return true on success, false on invalid arguments.
+ */
 bool adc_start_dma(ADC_TypeDef *adc, DMA_Channel_TypeDef *dma_ch, uint8_t channel,
                    uint16_t *buf, size_t len);
 
+/** ADC interrupt handler for ADC1. */
 void ADC1_IRQHandler(void);
 
-/* Usage examples (for reference only) */
+/** Example: polling conversion triggered by software. */
 void adc_example_poll_sw(void);
+/** Example: polling conversion triggered by hardware. */
 void adc_example_poll_hw(void);
+/** Example: interrupt-driven conversion triggered by software. */
 void adc_example_it_sw(void);
+/** Example: interrupt-driven conversion triggered by hardware. */
 void adc_example_it_hw(void);
+/** Example: DMA conversion triggered by software. */
 void adc_example_dma_sw(void);
+/** Example: DMA conversion triggered by hardware. */
 void adc_example_dma_hw(void);
 
 #endif /* ADC_H */
