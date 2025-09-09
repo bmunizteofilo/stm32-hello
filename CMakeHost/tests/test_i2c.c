@@ -3,9 +3,6 @@
 #include "dma.h"
 #include "rcc.h"
 
-RCC_TypeDef rcc_regs;
-FLASH_TypeDef flash_regs;
-
 int main(void) {
     volatile uint32_t i2c_mem[11] = {0};
     i2c_mem[6] = 0xFFFFFFFFu; /* ISR flags ready */

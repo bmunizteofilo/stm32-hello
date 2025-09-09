@@ -1,5 +1,10 @@
 #include "rcc.h"
 
+#ifndef STM32F0_FIRMWARE
+RCC_TypeDef rcc_regs;
+FLASH_TypeDef flash_regs;
+#endif
+
 static uint32_t sysclk_hz = 8000000u;
 
 static void flash_latency_cfg(uint32_t hz) {
