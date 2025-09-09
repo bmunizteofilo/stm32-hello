@@ -37,3 +37,7 @@ add_test(NAME adc COMMAND test_adc)
 add_executable(test_sensors test_sensors.c)
 target_link_libraries(test_sensors PRIVATE core)
 add_test(NAME sensors COMMAND test_sensors)
+
+add_executable(test_display test_display.c)
+target_link_libraries(test_display PRIVATE core)
+add_test(NAME display COMMAND test_display)
