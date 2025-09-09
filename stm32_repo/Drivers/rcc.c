@@ -138,3 +138,8 @@ void rcc_apb1_enable(uint32_t mask) {
 void rcc_apb2_enable(uint32_t mask) {
     RCC->APB2ENR |= mask;
 }
+
+void rcc_mco_enable_sysclk(void) {
+    /* route system clock to MCO pin without prescaler */
+    RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_MCO_MASK) | RCC_CFGR_MCO_SYSCLK;
+}

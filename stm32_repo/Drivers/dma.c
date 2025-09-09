@@ -11,11 +11,11 @@ bool dma_config_channel(DMA_Channel_TypeDef *ch, uint32_t ccr) {
 }
 
 void dma_set_peripheral(DMA_Channel_TypeDef *ch, const void *addr) {
-    ch->CPAR = (uint32_t)addr;
+    ch->CPAR = (uint32_t)(uintptr_t)addr;
 }
 
 void dma_set_memory(DMA_Channel_TypeDef *ch, void *addr) {
-    ch->CMAR = (uint32_t)addr;
+    ch->CMAR = (uint32_t)(uintptr_t)addr;
 }
 
 void dma_set_count(DMA_Channel_TypeDef *ch, uint16_t count) {

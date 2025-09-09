@@ -1,7 +1,13 @@
 #include <assert.h>
 #include "rtc.h"
+#include "rcc.h"
+
+RCC_TypeDef rcc_regs;
+FLASH_TypeDef flash_regs;
 
 int main(void) {
+    volatile uint32_t rtc_mem[6] = {0};
+    RTC_TypeDef *rtc = (RTC_TypeDef *)rtc_mem;
     rtc_datetime_t dt = {
         .year = 2023,
         .month = 12,
@@ -11,11 +17,11 @@ int main(void) {
         .seconds = 50,
     };
     rtc_datetime_t out;
-    assert(rtc_init((RTC_TypeDef *)0x40002800u));
-    assert(rtc_set_datetime((RTC_TypeDef *)0x40002800u, &dt));
-    assert(rtc_get_datetime((RTC_TypeDef *)0x40002800u, &out));
+    assert(rtc_init(rtc));
+    assert(rtc_set_datetime(rtc, &dt));
+    assert(rtc_get_datetime(rtc, &out));
     assert(out.year == dt.year);
-    assert(rtc_set_wakeup((RTC_TypeDef *)0x40002800u, 10u));
-    rtc_disable_wakeup((RTC_TypeDef *)0x40002800u);
+    assert(rtc_set_wakeup(rtc, 10u));
+    rtc_disable_wakeup(rtc);
     return 0;
 }
