@@ -30,3 +30,7 @@ add_test(NAME usart COMMAND test_usart)
 add_executable(test_tim test_tim.c)
 target_link_libraries(test_tim PRIVATE core)
 add_test(NAME tim COMMAND test_tim)
+
+add_executable(test_adc test_adc.c)
+target_link_libraries(test_adc PRIVATE core)
+add_test(NAME adc COMMAND test_adc)

@@ -27,8 +27,15 @@ typedef struct {
 
 #define RCC_BASE   0x40021000u
 #define FLASH_BASE 0x40022000u
+#ifdef STM32F0_FIRMWARE
 #define RCC   ((RCC_TypeDef *)RCC_BASE)
 #define FLASH ((FLASH_TypeDef *)FLASH_BASE)
+#else
+extern RCC_TypeDef rcc_regs;
+extern FLASH_TypeDef flash_regs;
+#define RCC   (&rcc_regs)
+#define FLASH (&flash_regs)
+#endif
 
 
 /* AHBENR bits */
@@ -42,6 +49,7 @@ typedef struct {
 
 /* APB2ENR bits */
 #define RCC_APB2ENR_SYSCFG (1u << 0)
+#define RCC_APB2ENR_ADC1   (1u << 9)
 #define RCC_APB2ENR_TIM1   (1u << 11)
 #define RCC_APB2ENR_SPI1   (1u << 12)
 #define RCC_APB2ENR_USART1 (1u << 14)
