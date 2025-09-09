@@ -10,9 +10,7 @@
 static adc_cb_t adc_cb;
 static void *adc_ctx;
 
-#ifndef STM32F0_FIRMWARE
 ADC_TypeDef adc1_regs;
-#endif
 
 bool adc_init(ADC_TypeDef *adc, const adc_cfg_t *cfg) {
     if (!adc || !cfg) {

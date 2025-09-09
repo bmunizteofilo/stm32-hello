@@ -19,12 +19,7 @@ typedef struct {
 } ADC_TypeDef;
 
 #define ADC1_BASE 0x40012400u
-#ifdef STM32F0_FIRMWARE
 #define ADC1 ((ADC_TypeDef *)ADC1_BASE)
-#else
-extern ADC_TypeDef adc1_regs;
-#define ADC1 (&adc1_regs)
-#endif
 
 /* ADC interrupt flags */
 #define ADC_ISR_ADRDY (1u << 0)
