@@ -12,7 +12,7 @@ else()
 endif()
 
 # Fontes dos drivers "puros C" dentro do projeto da IDE
-file(GLOB DRIVERS_SRC
+file(GLOB_RECURSE DRIVERS_SRC
   ../stm32_repo/Drivers/*.c
 )
 # Exclui arquivos com instruções específicas de ARM que falham no host
