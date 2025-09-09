@@ -3,9 +3,6 @@
 #include "dma.h"
 #include "rcc.h"
 
-RCC_TypeDef rcc_regs;
-FLASH_TypeDef flash_regs;
-
 int main(void) {
     volatile uint32_t spi_mem[9] = {0};
     SPI_TypeDef *spi = (SPI_TypeDef *)spi_mem;

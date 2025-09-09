@@ -26,3 +26,7 @@ add_test(NAME rtc COMMAND test_rtc)
 add_executable(test_usart test_usart.c)
 target_link_libraries(test_usart PRIVATE core)
 add_test(NAME usart COMMAND test_usart)
+
+add_executable(test_tim test_tim.c)
+target_link_libraries(test_tim PRIVATE core)
+add_test(NAME tim COMMAND test_tim)

@@ -25,10 +25,17 @@ typedef struct {
     volatile uint32_t ACR;
 } FLASH_TypeDef;
 
+#ifdef STM32F0_FIRMWARE
 #define RCC_BASE   0x40021000u
 #define FLASH_BASE 0x40022000u
 #define RCC   ((RCC_TypeDef *)RCC_BASE)
 #define FLASH ((FLASH_TypeDef *)FLASH_BASE)
+#else
+extern RCC_TypeDef rcc_regs;
+extern FLASH_TypeDef flash_regs;
+#define RCC   (&rcc_regs)
+#define FLASH (&flash_regs)
+#endif
 
 /* AHBENR bits */
 #define RCC_AHBENR_DMA1   (1u << 0)
@@ -41,11 +48,19 @@ typedef struct {
 
 /* APB2ENR bits */
 #define RCC_APB2ENR_SYSCFG (1u << 0)
+#define RCC_APB2ENR_TIM1   (1u << 11)
 #define RCC_APB2ENR_SPI1   (1u << 12)
 #define RCC_APB2ENR_USART1 (1u << 14)
+#define RCC_APB2ENR_TIM15  (1u << 16)
+#define RCC_APB2ENR_TIM16  (1u << 17)
+#define RCC_APB2ENR_TIM17  (1u << 18)
 
 /* APB1ENR bits */
+#define RCC_APB1ENR_TIM2   (1u << 0)
 #define RCC_APB1ENR_TIM3   (1u << 1)
+#define RCC_APB1ENR_TIM6   (1u << 4)
+#define RCC_APB1ENR_TIM7   (1u << 5)
+#define RCC_APB1ENR_TIM14  (1u << 8)
 #define RCC_APB1ENR_SPI2   (1u << 14)
 #define RCC_APB1ENR_USART2 (1u << 17)
 #define RCC_APB1ENR_USART3 (1u << 18)

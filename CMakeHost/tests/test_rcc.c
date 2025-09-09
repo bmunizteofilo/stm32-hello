@@ -1,9 +1,6 @@
 #include <assert.h>
 #include "rcc.h"
 
-RCC_TypeDef rcc_regs;
-FLASH_TypeDef flash_regs;
-
 int main(void) {
     rcc_regs.CR = (1u << 1) | (1u << 17) | (1u << 25);
     assert(rcc_sysclk_config(RCC_SYSCLK_HSI8));
