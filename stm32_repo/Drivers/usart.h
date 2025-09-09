@@ -60,8 +60,6 @@ typedef struct {
     enum usart_oversampling oversampling;
 } usart_cfg_t;
 
-typedef void (*usart_cb_t)(void *ctx);
-typedef void (*usart_irq_cb_t)(void *ctx, uint32_t isr);
 
 #define USART_IRQ_RXNE 0x1u
 #define USART_IRQ_TXE  0x2u
@@ -69,25 +67,44 @@ typedef void (*usart_irq_cb_t)(void *ctx, uint32_t isr);
 #define USART_IRQ_IDLE 0x8u
 #define USART_IRQ_PE   0x10u
 
-bool usart_init(USART_TypeDef *usart, const usart_cfg_t *cfg);
-void usart_enable(USART_TypeDef *usart, bool en);
-
-bool usart_write_poll(USART_TypeDef *usart, const uint8_t *data, size_t len);
-bool usart_read_poll(USART_TypeDef *usart, uint8_t *data, size_t len);
-
-bool usart_write_it_start(USART_TypeDef *usart, const uint8_t *data, size_t len, usart_cb_t cb, void *ctx);
-bool usart_read_it_start(USART_TypeDef *usart, uint8_t *data, size_t len, usart_cb_t cb, void *ctx);
-
-bool usart_write_dma_start(USART_TypeDef *usart, DMA_Channel_TypeDef *tx_ch, const uint8_t *data, size_t len, usart_cb_t cb, void *ctx);
-bool usart_read_dma_start(USART_TypeDef *usart, DMA_Channel_TypeDef *rx_ch, uint8_t *data, size_t len, usart_cb_t cb, void *ctx);
-
-void usart_enable_dma(USART_TypeDef *usart, bool rx, bool tx);
-void usart_enable_irq(USART_TypeDef *usart, uint32_t mask);
-bool usart_attach_irq(USART_TypeDef *usart, usart_irq_cb_t cb, void *ctx);
-void usart_detach_irq(USART_TypeDef *usart);
-
-void USART1_IRQHandler(void);
-void USART2_IRQHandler(void);
-void USART3_4_IRQHandler(void);
+/** Callback type for asynchronous USART operations. */
+typedef void (*usart_cb_t)(void *ctx);
+/** Callback type for raw ISR notifications. */
+typedef void (*usart_irq_cb_t)(void *ctx, uint32_t isr);
 
 #endif /* USART_H */
+/** Initialize a USART peripheral. */
+bool usart_init(USART_TypeDef *usart, const usart_cfg_t *cfg);
+/** Enable or disable USART. */
+void usart_enable(USART_TypeDef *usart, bool en);
+
+/** Blocking write operation. */
+bool usart_write_poll(USART_TypeDef *usart, const uint8_t *data, size_t len);
+/** Blocking read operation. */
+bool usart_read_poll(USART_TypeDef *usart, uint8_t *data, size_t len);
+
+/** Start interrupt-driven write. */
+bool usart_write_it_start(USART_TypeDef *usart, const uint8_t *data, size_t len, usart_cb_t cb, void *ctx);
+/** Start interrupt-driven read. */
+bool usart_read_it_start(USART_TypeDef *usart, uint8_t *data, size_t len, usart_cb_t cb, void *ctx);
+
+/** Start DMA-driven write. */
+bool usart_write_dma_start(USART_TypeDef *usart, DMA_Channel_TypeDef *tx_ch, const uint8_t *data, size_t len, usart_cb_t cb, void *ctx);
+/** Start DMA-driven read. */
+bool usart_read_dma_start(USART_TypeDef *usart, DMA_Channel_TypeDef *rx_ch, uint8_t *data, size_t len, usart_cb_t cb, void *ctx);
+
+/** Enable or disable DMA requests. */
+void usart_enable_dma(USART_TypeDef *usart, bool rx, bool tx);
+/** Enable specific USART interrupts. */
+void usart_enable_irq(USART_TypeDef *usart, uint32_t mask);
+/** Register a general USART interrupt callback. */
+bool usart_attach_irq(USART_TypeDef *usart, usart_irq_cb_t cb, void *ctx);
+/** Detach USART interrupt callback. */
+void usart_detach_irq(USART_TypeDef *usart);
+
+/** USART1 global interrupt handler. */
+void USART1_IRQHandler(void);
+/** USART2 global interrupt handler. */
+void USART2_IRQHandler(void);
+/** USART3 and USART4 combined interrupt handler. */
+void USART3_4_IRQHandler(void);

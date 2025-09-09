@@ -20,6 +20,7 @@ typedef struct {
     volatile uint32_t TDR;
 } USART_TypeDef_real;
 
+/** Convert generic USART pointer to register structure. */
 static inline USART_TypeDef_real *usart_real(USART_TypeDef *u) {
     return (USART_TypeDef_real *)u;
 }
@@ -50,6 +51,7 @@ static usart_it_state_t usart_it_state[4];
 static usart_dma_state_t usart_dma_state[4];
 static usart_irq_entry_t usart_irq_table[4];
 
+/** Translate USART instance to index. */
 static uint32_t usart_index(USART_TypeDef *u) {
     if (u == USART1) return 0u;
     if (u == USART2) return 1u;
@@ -58,10 +60,12 @@ static uint32_t usart_index(USART_TypeDef *u) {
     return 4u;
 }
 
+/** Obtain DMA channel index (1-based). */
 static uint8_t dma_channel_index(DMA_Channel_TypeDef *ch) {
     return (uint8_t)(ch - &DMA1->CH[0]) + 1u;
 }
 
+/** Initialize a USART peripheral. */
 bool usart_init(USART_TypeDef *usart, const usart_cfg_t *cfg) {
     if (!usart || !cfg || cfg->baudrate == 0u) {
         return false;
@@ -125,6 +129,7 @@ bool usart_init(USART_TypeDef *usart, const usart_cfg_t *cfg) {
     return true;
 }
 
+/** Enable or disable a USART. */
 void usart_enable(USART_TypeDef *usart, bool en) {
     if (!usart) return;
     USART_TypeDef_real *u = usart_real(usart);
@@ -135,6 +140,7 @@ void usart_enable(USART_TypeDef *usart, bool en) {
     }
 }
 
+/** Perform blocking transmit. */
 bool usart_write_poll(USART_TypeDef *usart, const uint8_t *data, size_t len) {
     if (!usart || (!data && len > 0u)) return false;
     USART_TypeDef_real *u = usart_real(usart);
@@ -145,6 +151,7 @@ bool usart_write_poll(USART_TypeDef *usart, const uint8_t *data, size_t len) {
     return true;
 }
 
+/** Perform blocking receive. */
 bool usart_read_poll(USART_TypeDef *usart, uint8_t *data, size_t len) {
     if (!usart || !data) return false;
     USART_TypeDef_real *u = usart_real(usart);
@@ -155,6 +162,7 @@ bool usart_read_poll(USART_TypeDef *usart, uint8_t *data, size_t len) {
     return true;
 }
 
+/** Start interrupt-driven transmit. */
 bool usart_write_it_start(USART_TypeDef *usart, const uint8_t *data, size_t len, usart_cb_t cb, void *ctx) {
     if (!usart || !data || len == 0u) return false;
     uint32_t idx = usart_index(usart);
@@ -172,6 +180,7 @@ bool usart_write_it_start(USART_TypeDef *usart, const uint8_t *data, size_t len,
     return true;
 }
 
+/** Start interrupt-driven receive. */
 bool usart_read_it_start(USART_TypeDef *usart, uint8_t *data, size_t len, usart_cb_t cb, void *ctx) {
     if (!usart || !data || len == 0u) return false;
     uint32_t idx = usart_index(usart);
@@ -189,6 +198,7 @@ bool usart_read_it_start(USART_TypeDef *usart, uint8_t *data, size_t len, usart_
     return true;
 }
 
+/** DMA completion callback for USART transfers. */
 static void usart_dma_cb(void *ctx, uint32_t flags) {
     (void)flags;
     usart_dma_state_t *st = (usart_dma_state_t *)ctx;
@@ -201,6 +211,7 @@ static void usart_dma_cb(void *ctx, uint32_t flags) {
     }
 }
 
+/** Start DMA-driven transmit. */
 bool usart_write_dma_start(USART_TypeDef *usart, DMA_Channel_TypeDef *tx_ch, const uint8_t *data, size_t len, usart_cb_t cb, void *ctx) {
     if (!usart || !tx_ch || !data || len == 0u) return false;
     uint32_t idx = usart_index(usart);
@@ -222,6 +233,7 @@ bool usart_write_dma_start(USART_TypeDef *usart, DMA_Channel_TypeDef *tx_ch, con
     return true;
 }
 
+/** Start DMA-driven reception. */
 bool usart_read_dma_start(USART_TypeDef *usart, DMA_Channel_TypeDef *rx_ch, uint8_t *data, size_t len, usart_cb_t cb, void *ctx) {
     if (!usart || !rx_ch || !data || len == 0u) return false;
     uint32_t idx = usart_index(usart);
@@ -243,6 +255,7 @@ bool usart_read_dma_start(USART_TypeDef *usart, DMA_Channel_TypeDef *rx_ch, uint
     return true;
 }
 
+/** Enable or disable DMA requests for RX/TX. */
 void usart_enable_dma(USART_TypeDef *usart, bool rx, bool tx) {
     if (!usart) return;
     USART_TypeDef_real *u = usart_real(usart);
@@ -252,6 +265,7 @@ void usart_enable_dma(USART_TypeDef *usart, bool rx, bool tx) {
     u->CR3 = cr3;
 }
 
+/** Enable selected USART interrupts. */
 void usart_enable_irq(USART_TypeDef *usart, uint32_t mask) {
     if (!usart) return;
     USART_TypeDef_real *u = usart_real(usart);
@@ -269,6 +283,7 @@ void usart_enable_irq(USART_TypeDef *usart, uint32_t mask) {
     }
 }
 
+/** Register generic interrupt callback. */
 bool usart_attach_irq(USART_TypeDef *usart, usart_irq_cb_t cb, void *ctx) {
     uint32_t idx = usart_index(usart);
     if (idx >= 4u) return false;
@@ -279,6 +294,7 @@ bool usart_attach_irq(USART_TypeDef *usart, usart_irq_cb_t cb, void *ctx) {
     return true;
 }
 
+/** Remove generic interrupt callback. */
 void usart_detach_irq(USART_TypeDef *usart) {
     uint32_t idx = usart_index(usart);
     if (idx >= 4u) return;
@@ -286,6 +302,7 @@ void usart_detach_irq(USART_TypeDef *usart) {
     usart_irq_table[idx].ctx = NULL;
 }
 
+/** Dispatch USART interrupts to handlers. */
 static void usart_irq_dispatch(uint32_t idx) {
     USART_TypeDef_real *u = usart_real(idx == 0u ? USART1 : (idx == 1u ? USART2 : (idx == 2u ? USART3 : USART4)));
     uint32_t isr = u->ISR;
@@ -315,8 +332,11 @@ static void usart_irq_dispatch(uint32_t idx) {
     }
 }
 
+/** USART1 global interrupt handler. */
 void USART1_IRQHandler(void) { usart_irq_dispatch(0u); }
+/** USART2 global interrupt handler. */
 void USART2_IRQHandler(void) { usart_irq_dispatch(1u); }
+/** Shared USART3/USART4 interrupt handler. */
 void USART3_4_IRQHandler(void) {
     usart_irq_dispatch(2u);
     usart_irq_dispatch(3u);

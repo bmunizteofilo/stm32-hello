@@ -85,15 +85,23 @@ enum rcc_sysclk_cfg {
 #define RCC_CFGR_MCO_MASK    (7u << RCC_CFGR_MCO_SHIFT)
 #define RCC_CFGR_MCO_SYSCLK  (4u << RCC_CFGR_MCO_SHIFT)
 
+/** Configure system clock using predefined configuration. */
 bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg);
+/** Configure system clock based on external HSE frequency. */
 bool rcc_sysclk_config_hse(uint32_t hse_hz, uint32_t sysclk_hz);
+/** Get current system clock frequency. */
 uint32_t rcc_sysclk_hz(void);
+/** Get flash latency wait states. */
 uint32_t rcc_flash_latency_ws(void);
 
+/** Enable AHB peripheral clocks using mask. */
 void rcc_ahb_enable(uint32_t mask);
+/** Enable APB1 peripheral clocks using mask. */
 void rcc_apb1_enable(uint32_t mask);
+/** Enable APB2 peripheral clocks using mask. */
 void rcc_apb2_enable(uint32_t mask);
 
+/** Output system clock on MCO pin. */
 void rcc_mco_enable_sysclk(void);
 
 #endif /* RCC_H */

@@ -39,15 +39,68 @@ typedef struct {
 #define DMA_IRQ_HT 0x2u
 #define DMA_IRQ_TE 0x4u
 
+/** Callback type for DMA transfer events. */
 typedef void (*dma_cb_t)(void *ctx, uint32_t flags);
 
+/**
+ * @brief Configure a DMA channel control register.
+ * @param ch  DMA channel instance.
+ * @param ccr Value for the CCR register.
+ * @return true on success, false on invalid arguments.
+ */
 bool dma_config_channel(DMA_Channel_TypeDef *ch, uint32_t ccr);
+
+/**
+ * @brief Set the peripheral address for a channel.
+ * @param ch   DMA channel instance.
+ * @param addr Peripheral source/destination address.
+ */
 void dma_set_peripheral(DMA_Channel_TypeDef *ch, const void *addr);
+
+/**
+ * @brief Set the memory address for a channel.
+ * @param ch   DMA channel instance.
+ * @param addr Memory source/destination address.
+ */
 void dma_set_memory(DMA_Channel_TypeDef *ch, void *addr);
+
+/**
+ * @brief Configure the number of transfers for a channel.
+ * @param ch    DMA channel instance.
+ * @param count Number of items to transfer.
+ */
 void dma_set_count(DMA_Channel_TypeDef *ch, uint16_t count);
+
+/**
+ * @brief Enable or disable a DMA channel.
+ * @param ch DMA channel instance.
+ * @param en true to enable, false to disable.
+ */
 void dma_enable(DMA_Channel_TypeDef *ch, bool en);
+
+/**
+ * @brief Register a callback for a DMA channel.
+ * @param dma     DMA controller instance.
+ * @param ch_idx  Channel index (1..7).
+ * @param cb      Callback function.
+ * @param ctx     User context passed to callback.
+ */
 void dma_set_callback(DMA_TypeDef *dma, uint8_t ch_idx, dma_cb_t cb, void *ctx);
+
+/**
+ * @brief Read interrupt status for a channel.
+ * @param dma    DMA controller instance.
+ * @param ch_idx Channel index.
+ * @return Flags for the specified channel.
+ */
 uint32_t dma_get_isr(DMA_TypeDef *dma, uint8_t ch_idx);
+
+/**
+ * @brief Clear interrupt flags for a channel.
+ * @param dma    DMA controller instance.
+ * @param ch_idx Channel index.
+ * @param flags  Flags to clear.
+ */
 void dma_clear_isr(DMA_TypeDef *dma, uint8_t ch_idx, uint32_t flags);
 
 #endif /* DMA_H */

@@ -9,6 +9,7 @@ struct RTC_TypeDef {
     volatile uint32_t WUTR;
 };
 
+/** Initialize RTC peripheral. */
 bool rtc_init(RTC_TypeDef *rtc) {
     if (!rtc) {
         return false;
@@ -18,6 +19,7 @@ bool rtc_init(RTC_TypeDef *rtc) {
     return true;
 }
 
+/** Set date and time registers. */
 bool rtc_set_datetime(RTC_TypeDef *rtc, const rtc_datetime_t *dt) {
     if (!rtc || !dt) {
         return false;
@@ -32,6 +34,7 @@ bool rtc_set_datetime(RTC_TypeDef *rtc, const rtc_datetime_t *dt) {
     return true;
 }
 
+/** Retrieve date and time from registers. */
 bool rtc_get_datetime(RTC_TypeDef *rtc, rtc_datetime_t *dt) {
     if (!rtc || !dt) {
         return false;
@@ -47,6 +50,7 @@ bool rtc_get_datetime(RTC_TypeDef *rtc, rtc_datetime_t *dt) {
     return true;
 }
 
+/** Configure wakeup timer. */
 bool rtc_set_wakeup(RTC_TypeDef *rtc, uint16_t seconds) {
     if (!rtc || seconds == 0u) {
         return false;
@@ -56,6 +60,7 @@ bool rtc_set_wakeup(RTC_TypeDef *rtc, uint16_t seconds) {
     return true;
 }
 
+/** Disable wakeup timer. */
 void rtc_disable_wakeup(RTC_TypeDef *rtc) {
     if (!rtc) {
         return;
@@ -63,6 +68,7 @@ void rtc_disable_wakeup(RTC_TypeDef *rtc) {
     rtc->CR &= ~1u;
 }
 
+/** Example: initialize RTC and set date/time. */
 void rtc_example_basic(void) {
     rtc_datetime_t dt = {
         .year = 2024,
@@ -76,6 +82,7 @@ void rtc_example_basic(void) {
     rtc_set_datetime(RTC, &dt);
 }
 
+/** Example: configure periodic wakeup. */
 void rtc_example_wakeup(void) {
     rtc_init(RTC);
     rtc_set_wakeup(RTC, 5u);

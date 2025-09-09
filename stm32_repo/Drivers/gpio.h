@@ -55,21 +55,74 @@ typedef struct {
     uint8_t alternate; /* alternate function index when mode == GPIO_MODE_AF */
 } gpio_cfg_t;
 
+/** Callback type for GPIO interrupts. */
 typedef void (*gpio_cb_t)(void *ctx, uint8_t pin);
+
+/**
+ * @brief Configure a GPIO pin with the specified settings.
+ * @param port GPIO port base.
+ * @param pin  Pin number (0-15).
+ * @param cfg  Configuration structure.
+ */
 void gpio_config(GPIO_TypeDef *port, uint8_t pin, const gpio_cfg_t *cfg);
+
+/**
+ * @brief Reset a GPIO pin to default state.
+ * @param port GPIO port base.
+ * @param pin  Pin number.
+ */
 void gpio_deinit(GPIO_TypeDef *port, uint8_t pin);
+
+/**
+ * @brief Write logic level to an output pin.
+ * @param port GPIO port base.
+ * @param pin  Pin number.
+ * @param level 0 for low, non-zero for high.
+ */
 void gpio_write(GPIO_TypeDef *port, uint8_t pin, uint8_t level);
+
+/**
+ * @brief Toggle the state of an output pin.
+ * @param port GPIO port base.
+ * @param pin  Pin number.
+ */
 void gpio_toggle(GPIO_TypeDef *port, uint8_t pin);
+
+/**
+ * @brief Read the current level of a pin.
+ * @param port GPIO port base.
+ * @param pin  Pin number.
+ * @return Pin logic level.
+ */
 uint8_t gpio_read(GPIO_TypeDef *port, uint8_t pin);
 
+/**
+ * @brief Attach an interrupt to a GPIO pin.
+ * @param port GPIO port base.
+ * @param pin  Pin number.
+ * @param edge Trigger edge selection.
+ * @param cb   Callback invoked on interrupt.
+ * @param ctx  User context passed to callback.
+ * @return true on success, false on invalid arguments.
+ */
 bool gpio_attach_irq(GPIO_TypeDef *port, uint8_t pin, enum gpio_edge_t edge,
                      gpio_cb_t cb, void *ctx);
+
+/**
+ * @brief Detach any interrupt from a GPIO pin.
+ * @param port GPIO port base.
+ * @param pin  Pin number.
+ */
 void gpio_detach_irq(GPIO_TypeDef *port, uint8_t pin);
 
 /* Convenience examples to exercise the driver from main() */
+/** Example: configure and drive output pins. */
 void gpio_example_output(void);
+/** Example: configure a pin as input. */
 void gpio_example_input(void);
+/** Example: attach an interrupt to a pin. */
 void gpio_example_irq(void);
+/** Example: toggle a pin. */
 void gpio_example_toggle(void);
 
 /* Example usage:

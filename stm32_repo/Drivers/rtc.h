@@ -19,13 +19,20 @@ typedef struct {
     uint8_t seconds;
 } rtc_datetime_t;
 
+/** Initialize RTC peripheral. */
 bool rtc_init(RTC_TypeDef *rtc);
+/** Set current date and time. */
 bool rtc_set_datetime(RTC_TypeDef *rtc, const rtc_datetime_t *dt);
+/** Retrieve current date and time. */
 bool rtc_get_datetime(RTC_TypeDef *rtc, rtc_datetime_t *dt);
+/** Configure wakeup timer in seconds. */
 bool rtc_set_wakeup(RTC_TypeDef *rtc, uint16_t seconds);
+/** Disable wakeup timer. */
 void rtc_disable_wakeup(RTC_TypeDef *rtc);
 
+/** Example: basic RTC initialization and set time. */
 void rtc_example_basic(void);
+/** Example: configure periodic wakeup. */
 void rtc_example_wakeup(void);
 
 /* Example usage:
