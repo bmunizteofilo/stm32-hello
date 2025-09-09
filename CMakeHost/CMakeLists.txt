@@ -13,7 +13,7 @@ endif()
 
 # Fontes dos drivers "puros C" dentro do projeto da IDE
 file(GLOB DRIVERS_SRC
-  ../stm32_repo/Drivers/*.c
+  ../stm32_repo/Drivers/rcc.c
 )
 
 # Lib 'core' com os drivers (ou interface vazia se ainda não existirem .c)

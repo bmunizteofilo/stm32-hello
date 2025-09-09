@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #define RCC_BASE 0x40021000u
+#define FLASH_BASE 0x40022000u
 
 typedef struct {
     volatile uint32_t CR;
@@ -23,7 +24,19 @@ typedef struct {
     volatile uint32_t CR2;
 } RCC_TypeDef;
 
-#define RCC ((RCC_TypeDef *)RCC_BASE)
+typedef struct {
+    volatile uint32_t ACR;
+} FLASH_TypeDef;
+
+#ifdef STM32F0_FIRMWARE
+#define RCC   ((RCC_TypeDef *)RCC_BASE)
+#define FLASH ((FLASH_TypeDef *)FLASH_BASE)
+#else
+extern RCC_TypeDef rcc_regs;
+extern FLASH_TypeDef flash_regs;
+#define RCC   (&rcc_regs)
+#define FLASH (&flash_regs)
+#endif
 
 /* AHBENR bits */
 #define RCC_AHBENR_DMA1   (1u << 0)
@@ -49,11 +62,16 @@ typedef struct {
 /* Predefined system clock configurations */
 enum rcc_sysclk_cfg {
     RCC_SYSCLK_HSI8,
+    RCC_SYSCLK_HSE8,
+    RCC_SYSCLK_PLL_HSI_24MHZ,
     RCC_SYSCLK_PLL_HSI_48MHZ,
+    RCC_SYSCLK_PLL_HSE_24MHZ,
+    RCC_SYSCLK_PLL_HSE_48MHZ,
 };
 
 bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg);
 uint32_t rcc_sysclk_hz(void);
+uint32_t rcc_flash_latency_ws(void);
 
 void rcc_ahb_enable(uint32_t mask);
 void rcc_apb1_enable(uint32_t mask);
