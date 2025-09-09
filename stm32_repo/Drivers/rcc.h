@@ -25,17 +25,10 @@ typedef struct {
     volatile uint32_t ACR;
 } FLASH_TypeDef;
 
-#ifdef STM32F0_FIRMWARE
 #define RCC_BASE   0x40021000u
 #define FLASH_BASE 0x40022000u
 #define RCC   ((RCC_TypeDef *)RCC_BASE)
 #define FLASH ((FLASH_TypeDef *)FLASH_BASE)
-#else
-extern RCC_TypeDef rcc_regs;
-extern FLASH_TypeDef flash_regs;
-#define RCC   (&rcc_regs)
-#define FLASH (&flash_regs)
-#endif
 
 /* AHBENR bits */
 #define RCC_AHBENR_DMA1   (1u << 0)
