@@ -47,6 +47,8 @@ typedef struct {
 #define RCC_APB1ENR_TIM3   (1u << 1)
 #define RCC_APB1ENR_SPI2   (1u << 14)
 #define RCC_APB1ENR_USART2 (1u << 17)
+#define RCC_APB1ENR_I2C1   (1u << 21)
+#define RCC_APB1ENR_I2C2   (1u << 22)
 
 /* Predefined system clock configurations */
 enum rcc_sysclk_cfg {
@@ -55,6 +57,7 @@ enum rcc_sysclk_cfg {
 };
 
 bool rcc_sysclk_config(enum rcc_sysclk_cfg cfg);
+bool rcc_sysclk_config_hse(uint32_t hse_hz, uint32_t sysclk_hz);
 uint32_t rcc_sysclk_hz(void);
 
 void rcc_ahb_enable(uint32_t mask);
