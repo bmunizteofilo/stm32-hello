@@ -5,6 +5,8 @@
 #include "tim.h"
 #include "rcc.h"
 #include "cm0.h"
+#include "gpio.h"
+#include "gpio_af.h"
 
 struct TIM_TypeDef {
     volatile uint32_t CR1;
@@ -203,23 +205,76 @@ void TIM15_IRQHandler(void) { tim_irq_dispatch(TIM15); }
 void TIM16_IRQHandler(void) { tim_irq_dispatch(TIM16); }
 void TIM17_IRQHandler(void) { tim_irq_dispatch(TIM17); }
 
-static void tim_dummy_cb(void *ctx) { (void)ctx; }
+/* Último período medido pelo exemplo de captura (em contagens do timer) */
+volatile uint32_t tim_ic_last_period;
 
+/* Armazena o período entre capturas sucessivas e pisca PC9 */
+static void tim_capture_cb(void *ctx) {
+    (void)ctx;
+    static uint32_t prev;
+    uint32_t now = tim_get_capture(TIM3, 2u);
+    tim_ic_last_period = now - prev;
+    prev = now;
+    gpio_toggle(GPIOC, 9);
+}
+
+/* Pisca PC8 a cada evento de atualização */
+static void tim_blink_cb(void *ctx) {
+    (void)ctx;
+    gpio_toggle(GPIOC, 8);
+}
+
+/*
+ * Exemplo: gera PWM no TIM3 canal 1 (PA6, AF1).
+ * PSC = 799 e ARR = 999 resultam em aproximadamente 60 Hz quando o clock do
+ * timer é 48 MHz. O valor de compare em 500 produz duty cycle de 50%, ideal
+ * para controlar brilho de LED ou a velocidade de uma ventoinha.
+ * Conecte um LED com resistor a PA6 para visualizar o PWM.
+ */
 void tim_example_pwm(void) {
+    gpio_config(GPIOA, 6, &(gpio_cfg_t){
+        .mode = GPIO_MODE_AF,
+        .otype = GPIO_OTYPE_PP,
+        .speed = GPIO_SPEED_HIGH,
+        .alternate = PA6_AF1_TIM3_CH1,
+    });
+
     tim_init(TIM3, &(tim_cfg_t){
         .mode = TIM_COUNTER_UP,
         .prescaler = 799u,
         .period = 999u,
         .preload = true,
     });
+    /* Usa o recurso de Output Compare em modo PWM1 */
     tim_config_output(TIM3, 1u, &(tim_oc_cfg_t){
         .mode = TIM_OC_PWM1,
-        .compare = 500u,
+        .compare = 500u, /* 50% de duty */
     });
     tim_enable(TIM3, true);
 }
 
+/*
+ * Exemplo: captura de entradas usando TIM3 canal 2 (PA7, AF1).
+ * O contador sobe até 0xFFFF com PSC = 799, oferecendo resolução de
+ * aproximadamente 13 µs para clock de 48 MHz. Cada borda de subida gera uma
+ * interrupção que calcula o período entre pulsos e armazena o valor em
+ * `tim_ic_last_period`. Além disso, o callback pisca o LED em PC9 a cada
+ * captura. Para testar, alimente PA7 com um sinal quadrado de 0--3,3 V
+ * (por exemplo, saída do gerador de funções ou do exemplo de PWM).
+*/
 void tim_example_input_capture(void) {
+    gpio_config(GPIOC, 9, &(gpio_cfg_t){
+        .mode = GPIO_MODE_OUTPUT,
+        .otype = GPIO_OTYPE_PP,
+        .speed = GPIO_SPEED_LOW,
+    });
+
+    gpio_config(GPIOA, 7, &(gpio_cfg_t){
+        .mode = GPIO_MODE_AF,
+        .pull = GPIO_PULL_DOWN,
+        .alternate = PA7_AF1_TIM3_CH2,
+    });
+
     tim_init(TIM3, &(tim_cfg_t){
         .mode = TIM_COUNTER_UP,
         .prescaler = 799u,
@@ -229,17 +284,56 @@ void tim_example_input_capture(void) {
         .polarity = TIM_IC_RISING,
         .enable_irq = true,
     });
-    tim_attach_cc_irq(TIM3, 2u, tim_dummy_cb, NULL);
+    tim_attach_cc_irq(TIM3, 2u, tim_capture_cb, NULL);
     tim_enable(TIM3, true);
 }
 
+/*
+ * Exemplo: interrupção periódica por evento de atualização.
+ * Com PSC = 7999 e ARR = 9999, o TIM3 gera uma interrupção a cada ~1,6 s
+ * (clock de 48 MHz). O callback pisca o LED conectado em PC8, mostrando como
+ * usar o timer para tarefas periódicas.
+ */
 void tim_example_update_irq(void) {
+    gpio_config(GPIOC, 8, &(gpio_cfg_t){
+        .mode = GPIO_MODE_OUTPUT,
+        .otype = GPIO_OTYPE_PP,
+        .speed = GPIO_SPEED_LOW,
+    });
+
     tim_init(TIM3, &(tim_cfg_t){
         .mode = TIM_COUNTER_UP,
         .prescaler = 7999u,
         .period = 9999u,
     });
-    tim_attach_update_irq(TIM3, tim_dummy_cb, NULL);
+    tim_attach_update_irq(TIM3, tim_blink_cb, NULL);
+    tim_enable(TIM3, true);
+}
+
+/*
+ * Exemplo: PWM de 50 Hz para servo no TIM3 canal 3 (PB0, AF1).
+ * A base de tempo de 10 kHz (PSC = 4799) gera período de 20 ms com ARR = 199.
+ * O compare em 15 produz pulso de 1,5 ms (posição central). Ajuste entre 10 e
+ * 20 para mover o servo.
+ */
+void tim_example_servo_pwm(void) {
+    gpio_config(GPIOB, 0, &(gpio_cfg_t){
+        .mode = GPIO_MODE_AF,
+        .otype = GPIO_OTYPE_PP,
+        .speed = GPIO_SPEED_HIGH,
+        .alternate = PB0_AF1_TIM3_CH3,
+    });
+
+    tim_init(TIM3, &(tim_cfg_t){
+        .mode = TIM_COUNTER_UP,
+        .prescaler = 4799u,
+        .period = 199u,
+        .preload = true,
+    });
+    tim_config_output(TIM3, 3u, &(tim_oc_cfg_t){
+        .mode = TIM_OC_PWM1,
+        .compare = 15u,
+    });
     tim_enable(TIM3, true);
 }
 

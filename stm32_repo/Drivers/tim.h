@@ -93,9 +93,19 @@ void tim_attach_cc_irq(TIM_TypeDef *tim, uint8_t ch, tim_cb_t cb, void *ctx);
 void tim_detach_update_irq(TIM_TypeDef *tim);
 void tim_detach_cc_irq(TIM_TypeDef *tim, uint8_t ch);
 
+extern volatile uint32_t tim_ic_last_period;
+
+/* Exemplo: gera PWM no TIM3 canal 1 (PA6) */
 void tim_example_pwm(void);
+
+/* Exemplo: captura de entrada no TIM3 canal 2 (PA7) com LED em PC9 */
 void tim_example_input_capture(void);
+
+/* Exemplo: interrupção periódica via atualização do timer (pisca PC8) */
 void tim_example_update_irq(void);
+
+/* Exemplo: PWM de 50 Hz para servo no TIM3 canal 3 (PB0) */
+void tim_example_servo_pwm(void);
 
 #endif /* TIM_H */
 
