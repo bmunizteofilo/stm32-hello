@@ -20,10 +20,23 @@ typedef struct {
     volatile uint32_t I2SPR;
 } SPI_TypeDef_real;
 
-/** Convert generic SPI pointer to register structure. */
+#ifndef STM32F0_FIRMWARE
+static SPI_TypeDef_real spi_stub_regs[2];
+static uint16_t spi_log[256];
+static size_t spi_log_idx;
+static inline SPI_TypeDef_real *spi_real(SPI_TypeDef *spi) {
+    if (spi == SPI1) return &spi_stub_regs[0];
+    if (spi == SPI2) return &spi_stub_regs[1];
+    return &spi_stub_regs[0];
+}
+void spi_stub_reset(void) { spi_log_idx = 0u; }
+size_t spi_stub_count(void) { return spi_log_idx; }
+uint16_t spi_stub_get(size_t idx) { return idx < spi_log_idx ? spi_log[idx] : 0u; }
+#else
 static inline SPI_TypeDef_real *spi_real(SPI_TypeDef *spi) {
     return (SPI_TypeDef_real *)spi;
 }
+#endif
 
 typedef struct {
     spi_cb_t cb;
@@ -136,6 +149,7 @@ void spi_enable(SPI_TypeDef *spi, bool enable) {
 
 /** Perform a blocking SPI transfer. */
 uint16_t spi_transfer(SPI_TypeDef *spi, uint16_t data) {
+#ifdef STM32F0_FIRMWARE
     SPI_TypeDef_real *s = spi_real(spi);
     while ((s->SR & (1u << 1)) == 0u) {
     }
@@ -143,7 +157,15 @@ uint16_t spi_transfer(SPI_TypeDef *spi, uint16_t data) {
     while ((s->SR & (1u << 0)) == 0u) {
     }
     return (uint16_t)s->DR;
+#else
+    (void)spi;
+    if (spi_log_idx < sizeof(spi_log)/sizeof(spi_log[0])) {
+        spi_log[spi_log_idx++] = data;
+    }
+    return 0xFFu;
+#endif
 }
+
 
 /** Enable specific SPI interrupts. */
 void spi_enable_irq(SPI_TypeDef *spi, uint32_t mask) {
