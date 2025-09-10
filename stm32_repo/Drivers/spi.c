@@ -108,6 +108,32 @@ bool spi_init(SPI_TypeDef *spi, const spi_cfg_t *cfg) {
     if (cfg->nss == SPI_NSS_SOFT) {
         cr1 |= (1u << 9) | (1u << 8); /* SSM | SSI */
     }
+    switch (cfg->baudrate) {
+    case SPI_BAUD_DIV4:
+        cr1 |= (1u << 3);
+        break;
+    case SPI_BAUD_DIV8:
+        cr1 |= (2u << 3);
+        break;
+    case SPI_BAUD_DIV16:
+        cr1 |= (3u << 3);
+        break;
+    case SPI_BAUD_DIV32:
+        cr1 |= (4u << 3);
+        break;
+    case SPI_BAUD_DIV64:
+        cr1 |= (5u << 3);
+        break;
+    case SPI_BAUD_DIV128:
+        cr1 |= (6u << 3);
+        break;
+    case SPI_BAUD_DIV256:
+        cr1 |= (7u << 3);
+        break;
+    case SPI_BAUD_DIV2:
+    default:
+        break;
+    }
     switch (cfg->direction) {
     case SPI_DIR_HALF_DUPLEX_RX:
         cr1 |= (1u << 15); /* BIDIMODE */
@@ -406,6 +432,7 @@ void spi_example_jedec_id(void) {
         .datasize = 8u,
         .first_bit = SPI_FIRST_MSB,
         .nss = SPI_NSS_SOFT,
+        .baudrate = SPI_BAUD_DIV8,
     };
     spi_init(SPI1, &cfg);
     spi_cs_init(GPIOC, 0u);
