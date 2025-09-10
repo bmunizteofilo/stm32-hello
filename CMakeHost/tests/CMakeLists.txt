@@ -106,3 +106,7 @@ add_test(NAME tmc2209 COMMAND test_tmc2209)
 add_executable(test_tmc2130 test_tmc2130.c)
 target_link_libraries(test_tmc2130 PRIVATE core)
 add_test(NAME tmc2130 COMMAND test_tmc2130)
+
+add_executable(test_sdcard test_sdcard.c)
+target_link_libraries(test_sdcard PRIVATE core)
+add_test(NAME sdcard COMMAND test_sdcard)
