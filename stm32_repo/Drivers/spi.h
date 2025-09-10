@@ -46,6 +46,17 @@ enum spi_nss_t {
     SPI_NSS_SOFT,
 };
 
+enum spi_baudrate_t {
+    SPI_BAUD_DIV2 = 0,
+    SPI_BAUD_DIV4,
+    SPI_BAUD_DIV8,
+    SPI_BAUD_DIV16,
+    SPI_BAUD_DIV32,
+    SPI_BAUD_DIV64,
+    SPI_BAUD_DIV128,
+    SPI_BAUD_DIV256,
+};
+
 #define SPI_IRQ_RXNE 0x1u
 #define SPI_IRQ_TXE  0x2u
 #define SPI_IRQ_ERR  0x4u
@@ -64,6 +75,7 @@ typedef struct {
     uint8_t datasize; /* 4..16 */
     enum spi_first_bit_t first_bit;
     enum spi_nss_t nss;
+    enum spi_baudrate_t baudrate;
     bool crc_enable;
     uint16_t crc_poly;
 } spi_cfg_t;

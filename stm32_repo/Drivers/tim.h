@@ -82,6 +82,9 @@ bool tim_init(TIM_TypeDef *tim, const tim_cfg_t *cfg);
 /** Enable or disable a timer. */
 void tim_enable(TIM_TypeDef *tim, bool en);
 
+/** Obtain pointer to a channel's CCR register (useful for DMA). */
+volatile uint32_t *tim_ccr_ptr(TIM_TypeDef *tim, uint8_t ch);
+
 /** Configure an output compare channel. */
 bool tim_config_output(TIM_TypeDef *tim, uint8_t ch, const tim_oc_cfg_t *cfg);
 /** Update compare value for an output channel. */

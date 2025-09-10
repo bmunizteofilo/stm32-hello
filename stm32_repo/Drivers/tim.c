@@ -93,7 +93,7 @@ void tim_enable(TIM_TypeDef *tim, bool en) {
 }
 
 /** Return pointer to CCR register for a channel. */
-static volatile uint32_t *tim_ccr(TIM_TypeDef *tim, uint8_t ch) {
+volatile uint32_t *tim_ccr_ptr(TIM_TypeDef *tim, uint8_t ch) {
     return &(&tim->CCR1)[ch - 1u];
 }
 
@@ -113,7 +113,7 @@ bool tim_config_output(TIM_TypeDef *tim, uint8_t ch, const tim_oc_cfg_t *cfg) {
 /** Update compare value of a channel. */
 void tim_set_compare(TIM_TypeDef *tim, uint8_t ch, uint32_t compare) {
     if (!tim || ch == 0u || ch > 4u) return;
-    *tim_ccr(tim, ch) = compare;
+    *tim_ccr_ptr(tim, ch) = compare;
 }
 
 /** Configure an input capture channel. */
@@ -138,7 +138,7 @@ bool tim_config_input(TIM_TypeDef *tim, uint8_t ch, const tim_ic_cfg_t *cfg) {
 /** Read captured value. */
 uint32_t tim_get_capture(TIM_TypeDef *tim, uint8_t ch) {
     if (!tim || ch == 0u || ch > 4u) return 0u;
-    return *tim_ccr(tim, ch);
+    return *tim_ccr_ptr(tim, ch);
 }
 
 /** Enable or disable DMA requests. */
