@@ -110,3 +110,7 @@ add_test(NAME tmc2130 COMMAND test_tmc2130)
 add_executable(test_sdcard test_sdcard.c)
 target_link_libraries(test_sdcard PRIVATE core)
 add_test(NAME sdcard COMMAND test_sdcard)
+
+add_executable(test_debounce test_debounce.c)
+target_link_libraries(test_debounce PRIVATE core)
+add_test(NAME debounce COMMAND test_debounce)
