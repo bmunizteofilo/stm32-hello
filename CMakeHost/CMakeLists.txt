@@ -17,6 +17,7 @@ file(GLOB_RECURSE DRIVERS_SRC
 )
 # Exclui arquivos com instruções específicas de ARM que falham no host
 list(FILTER DRIVERS_SRC EXCLUDE REGEX "cm0\\.c$")
+list(FILTER DRIVERS_SRC EXCLUDE REGEX "examples/")
 # Stubs para compilar no host (substituem implementações com assembly)
 list(APPEND DRIVERS_SRC ../stm32_repo/Drivers/cm0_stub.c)
 
