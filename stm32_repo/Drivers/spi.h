@@ -106,3 +106,8 @@ bool spi_transfer_dma_start(SPI_TypeDef *spi, DMA_Channel_TypeDef *tx_ch, DMA_Ch
 void spi_example_jedec_id(void);
 /** Example: stream data to SPI peripheral. */
 void spi_example_display_stream(const uint8_t *data, size_t len);
+#ifndef STM32F0_FIRMWARE
+void spi_stub_reset(void);
+size_t spi_stub_count(void);
+uint16_t spi_stub_get(size_t idx);
+#endif
